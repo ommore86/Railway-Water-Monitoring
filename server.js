@@ -3,10 +3,15 @@ const cors = require("cors");
 require("dotenv").config();
 require("./config/db");
 
+const sensorRoutes = require("./routes/sensorRoutes");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// connect routes
+app.use("/api", sensorRoutes);
 
 // test route
 app.get("/", (req, res) => {
