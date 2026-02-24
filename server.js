@@ -6,7 +6,7 @@ require("./config/db");
 const sensorRoutes = require("./routes/sensorRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const authRoutes = require("./routes/authRoutes");
-
+const sensorRoutes = require("./routes/sensor.routes");
 const app = express();
 
 app.use(cors());
@@ -18,6 +18,8 @@ app.use("/api", sensorRoutes);
 app.use("/api", dashboardRoutes);
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/sensor", sensorRoutes);
 
 // test route
 app.get("/", (req, res) => {
