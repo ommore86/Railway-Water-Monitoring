@@ -1,4 +1,4 @@
-const db = require("../config/db");
+const db = require("../config/mysql");
 
 // 1️⃣ Get all stations
 exports.getStations = async (req, res) => {
