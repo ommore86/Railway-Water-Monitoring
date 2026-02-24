@@ -13,8 +13,6 @@ app.use(cors());
 app.use(express.json());
 
 // connect routes
-app.use("/api", sensorRoutes);
-
 app.use("/api", dashboardRoutes);
 
 app.use("/api/auth", authRoutes);
