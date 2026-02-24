@@ -1,3 +1,6 @@
+let selectedTrain = null;
+let refreshInterval = null;
+
 const API = "http://localhost:5000/api";
 const token = localStorage.getItem("token");
 
@@ -43,9 +46,22 @@ async function loadTrains(){
 
 // 3️⃣ Load coaches
 async function loadCoaches(){
-    const train_no = document.getElementById("trainSelect").value;
 
-    const res = await fetch(`${API}/coaches/${train_no}`, { headers });
+    selectedTrain = document.getElementById("trainSelect").value;
+
+    if(refreshInterval) clearInterval(refreshInterval);
+
+    await fetchAndRender();
+
+    // auto refresh every 5 sec
+    refreshInterval = setInterval(fetchAndRender, 5000);
+}
+
+async function fetchAndRender(){
+
+    if(!selectedTrain) return;
+
+    const res = await fetch(`${API}/coaches/${selectedTrain}`, { headers });
     const coaches = await res.json();
 
     const container = document.getElementById("coachContainer");
@@ -65,4 +81,9 @@ async function loadCoaches(){
             </div>
         </div>`;
     });
+}
+
+function logout(){
+    localStorage.removeItem("token");
+    window.location.href="login.html";
 }
