@@ -1,27 +1,24 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-require("./config/db");
 
-// const sensorRoutes = require("./routes/sensorRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const authRoutes = require("./routes/authRoutes");
 const sensorRoutes = require("./routes/sensor.routes");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// connect routes
+// Routes
 app.use("/api", dashboardRoutes);
-
 app.use("/api/auth", authRoutes);
-
 app.use("/api/sensor", sensorRoutes);
 
-// test route
+// Test route
 app.get("/", (req, res) => {
-    res.send("Server running successfully 🚆");
+    res.send("🚆 Railway Water Monitoring Backend Running");
 });
 
 const PORT = process.env.PORT || 5000;
