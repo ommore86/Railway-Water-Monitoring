@@ -3,7 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 require("./config/db");
 
-const sensorRoutes = require("./routes/sensorRoutes");
+// const sensorRoutes = require("./routes/sensorRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const authRoutes = require("./routes/authRoutes");
 const sensorRoutes = require("./routes/sensor.routes");
