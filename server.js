@@ -1,10 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const dashboardRoutes = require("./routes/dashboardRoutes");
 require("dotenv").config();
 require("./config/db");
 
 const sensorRoutes = require("./routes/sensorRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.use(express.json());
 app.use("/api", sensorRoutes);
 
 app.use("/api", dashboardRoutes);
+
+app.use("/api/auth", authRoutes);
 
 // test route
 app.get("/", (req, res) => {

@@ -38,3 +38,13 @@ CREATE TABLE water_levels (
 );
 
 SHOW TABLES;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password VARCHAR(255),
+    role ENUM('superadmin','admin','user') DEFAULT 'user',
+    station_id VARCHAR(20) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
