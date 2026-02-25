@@ -21,6 +21,8 @@ exports.verifyToken = (req, res, next) => {
         console.log("JWT ERROR:", err.message);
         return res.status(401).json({ error: "Invalid token" });
     }
+
+    console.log("AUTH HEADER:", req.headers.authorization);
 };
 
 // ROLE CHECK
