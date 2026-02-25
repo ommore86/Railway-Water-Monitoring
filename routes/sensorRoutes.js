@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/mysql");
+const db = require("../database/mysql");
 
 router.post("/upload", async (req, res) => {
   try {

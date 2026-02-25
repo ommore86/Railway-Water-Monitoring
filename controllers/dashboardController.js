@@ -1,48 +1,19 @@
-const db = require("../config/mysql");
+const db = require("../database/mysql");
 
-// 1️⃣ Get all stations
-exports.getStations = async (req, res) => {
-    try {
-        const [rows] = await db.promise().query("SELECT * FROM stations");
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
+exports.getDashboard = async (req, res) => {
+  try {
+    const [data] = await db.query(`
+      SELECT coachId,
+             AVG(waterLevel) as avgWater,
+             AVG(temperature) as avgTemp,
+             MAX(timestamp) as lastUpdate
+      FROM sensors
+      GROUP BY coachId
+    `);
 
-// 2️⃣ Get trains at station
-exports.getTrainsByStation = async (req, res) => {
-    try {
-        const { station_id } = req.params;
+    res.json(data);
 
-        const [rows] = await db.promise().query(
-            `SELECT DISTINCT t.train_no, t.train_name
-             FROM water_levels w
-             JOIN trains t ON w.train_no = t.train_no
-             WHERE w.station_id = ?`,
-            [station_id]
-        );
-
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
-
-// 3️⃣ Get coaches + water level of train
-exports.getTrainCoaches = async (req, res) => {
-    try {
-        const { train_no } = req.params;
-
-        const [rows] = await db.promise().query(
-            `SELECT coach_no, water_level, updated_at
-             FROM water_levels
-             WHERE train_no = ?`,
-            [train_no]
-        );
-
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json(err);
-    }
+  } catch (err) {
+    res.status(500).json({ error: "Dashboard error" });
+  }
 };

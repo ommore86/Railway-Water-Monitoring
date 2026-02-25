@@ -1,51 +1,32 @@
-const db = require("../config/db");
+const db = require("../database/mysql");
 
-exports.receiveSensorData = async (req, res) => {
-    try {
-        const { station_id, station_name, train_no, train_name, coaches } = req.body;
+exports.addSensorData = async (req, res) => {
+  try {
+    const { coachId, stationId, waterLevel, temperature } = req.body;
 
-        // 1️⃣ Insert station if not exists
-        await db.promise().query(
-            `INSERT INTO stations (station_id, station_name)
-             VALUES (?, ?)
-             ON DUPLICATE KEY UPDATE station_name = VALUES(station_name)`,
-            [station_id, station_name]
-        );
+    await db.query(
+      `INSERT INTO sensors (coachId, stationId, waterLevel, temperature)
+       VALUES (?, ?, ?, ?)`,
+      [coachId, stationId, waterLevel, temperature]
+    );
 
-        // 2️⃣ Insert train if not exists
-        await db.promise().query(
-            `INSERT INTO trains (train_no, train_name)
-             VALUES (?, ?)
-             ON DUPLICATE KEY UPDATE train_name = VALUES(train_name)`,
-            [train_no, train_name]
-        );
+    res.json({ success: true, message: "Data stored successfully" });
 
-        // 3️⃣ Process each coach
-        for (const coach of coaches) {
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
+};
 
-            // insert coach
-            await db.promise().query(
-                `INSERT INTO coaches (train_no, coach_no)
-                 VALUES (?, ?)
-                 ON DUPLICATE KEY UPDATE coach_no = coach_no`,
-                [train_no, coach.coach_no]
-            );
+exports.getSensorData = async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT * FROM sensors ORDER BY timestamp DESC LIMIT 100`
+    );
 
-            // UPSERT water level (NO DUPLICATES)
-            await db.promise().query(
-                `INSERT INTO water_levels (station_id, train_no, coach_no, water_level)
-                 VALUES (?, ?, ?, ?)
-                 ON DUPLICATE KEY UPDATE
-                    water_level = VALUES(water_level),
-                    updated_at = CURRENT_TIMESTAMP`,
-                [station_id, train_no, coach.coach_no, coach.water_level]
-            );
-        }
+    res.json(rows);
 
-        res.json({ message: "Sensor data stored successfully" });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Server error" });
-    }
+  } catch (err) {
+    res.status(500).json({ error: "Database error" });
+  }
 };
