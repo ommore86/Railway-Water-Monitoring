@@ -88,20 +88,21 @@ function logout() {
 
 
 // ---------------- ROLE BASED UI ----------------
-document.addEventListener("DOMContentLoaded", async () => {
+// ROLE BASED UI
+document.addEventListener("DOMContentLoaded", () => {
 
-  // Start live data only after page ready
-  loadData();
-  setInterval(loadData, 3000);
+  const role = (localStorage.getItem("role") || "").toLowerCase();
 
-  // ADMIN PANEL
-  if (role === "admin" || role === "super_admin") {
-    const panel = document.getElementById("adminPanel");
-    if (panel) panel.style.display = "block";
-    await loadUsers();
+  console.log("Logged in as role:", role);
+
+  if (role === "admin" || role === "superadmin" || role === "super_admin") {
+      const panel = document.getElementById("adminPanel");
+      if(panel){
+        panel.style.display = "block";
+        loadUsers();
+      }
   }
 });
-
 
 // ---------------- LOAD USERS ----------------
 async function loadUsers() {
