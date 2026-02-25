@@ -116,79 +116,99 @@
 
 <body>
 
-  <header class="topbar">
-    <h2>🚆 Railway Water Monitoring Dashboard</h2>
-    <button onclick="logout()">Logout</button>
-  </header>
+<header class="topbar">
+  <h2>🚆 Railway Water Monitoring Dashboard</h2>
+  <button onclick="logout()">Logout</button>
+</header>
 
-  <section class="cards">
-    <div class="card good">
-      <h3>Healthy Coaches</h3>
-      <p id="healthyCount">0</p>
+
+<!-- ===== STATS ===== -->
+<section class="cards">
+  <div class="card good">
+    <h3>Healthy Coaches</h3>
+    <p id="healthyCount">0</p>
+  </div>
+
+  <div class="card warning">
+    <h3>Low Water</h3>
+    <p id="lowCount">0</p>
+  </div>
+
+  <div class="card danger">
+    <h3>Critical</h3>
+    <p id="criticalCount">0</p>
+  </div>
+</section>
+
+
+<!-- ===== WATER DATA ===== -->
+<section class="table-section">
+  <h2>Live Coach Water Status</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Station</th>
+        <th>Train</th>
+        <th>Coach</th>
+        <th>Water Level</th>
+        <th>Status</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+
+    <tbody id="dataTable"></tbody>
+  </table>
+</section>
+
+
+<!-- ===== ADMIN PANEL (SEPARATE PAGE SECTION) ===== -->
+<section id="adminPanel" style="display:none;padding:30px">
+
+  <h2>👨‍💼 User Management</h2>
+
+  <div style="
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  ">
+
+    <h3>Create User</h3>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+
+      <input id="u_name" placeholder="Name">
+      <input id="u_email" placeholder="Email">
+      <input id="u_pass" placeholder="Password">
+
+      <select id="u_role">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <input id="u_station" placeholder="Station Code (ST01)">
+      <button onclick="createUser()">Create</button>
+
     </div>
+  </div>
 
-    <div class="card warning">
-      <h3>Low Water</h3>
-      <p id="lowCount">0</p>
-    </div>
 
-    <div class="card danger">
-      <h3>Critical</h3>
-      <p id="criticalCount">0</p>
-    </div>
-  </section>
+  <h3>All Users</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Station Access</th>
+      </tr>
+    </thead>
+    <tbody id="usersTable"></tbody>
+  </table>
 
-  <section class="table-section">
-    <h2>Live Coach Water Status</h2>
+</section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Station</th>
-          <th>Train</th>
-          <th>Coach</th>
-          <th>Water Level</th>
-          <th>Status</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-
-      <tbody id="dataTable">
-        <!-- rows will come from JS -->
-      </tbody>
-
-    </table>
-
-    <section id="adminPanel" style="display:none;padding:20px">
-      <h2>User Management</h2>
-
-      <div style="display:flex;gap:10px;margin-bottom:15px">
-        <input id="u_name" placeholder="Name">
-        <input id="u_email" placeholder="Email">
-        <input id="u_pass" placeholder="Password">
-        <select id="u_role">
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-        <input id="u_station" placeholder="Station Code">
-        <button onclick="createUser()">Create</button>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Station</th>
-          </tr>
-        </thead>
-        <tbody id="usersTable"></tbody>
-      </table>
-    </section>
-  </section>
-
-  <script src="js/dashboard.js?v=99"></script>
+<script src="js/dashboard.js?v=100"></script>
 </body>
-
-</html>
