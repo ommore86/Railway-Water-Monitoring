@@ -12,8 +12,10 @@ exports.verifyToken = (req, res, next) => {
     try {
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, SECRET);
+
         req.user = decoded;
         next();
+
     } catch (err) {
         return res.status(401).json({ error: "Invalid or expired token" });
     }
@@ -23,7 +25,7 @@ exports.verifyToken = (req, res, next) => {
 exports.allowRoles = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role))
-            return res.status(403).json({ error: "Forbidden: insufficient permission" });
+            return res.status(403).json({ error: "Forbidden" });
 
         next();
     };
