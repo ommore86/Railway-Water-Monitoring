@@ -1,28 +1,35 @@
 const jwt = require("jsonwebtoken");
 
-const SECRET = "railway_secret_key";
+const SECRET = process.env.JWT_SECRET || "railway_secret";
 
-// verify login token
+// Verify login token
 exports.verifyToken = (req, res, next) => {
-    const token = req.headers.authorization;
+    const authHeader = req.headers.authorization;
 
-    if (!token)
-        return res.status(401).json({ error: "Access denied. No token provided." });
+    if (!authHeader)
+        return res.status(401).json({ error: "No token provided" });
 
     try {
-        const decoded = jwt.verify(token.split(" ")[1], SECRET);
-        req.user = decoded;
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, SECRET);
+
+        req.user = decoded; // {id, role, station}
         next();
+
     } catch (err) {
-        res.status(401).json({ error: "Invalid token" });
+        return res.status(401).json({ error: "Invalid or expired token" });
     }
 };
 
-// allow only specific roles
+// Allow only specific roles
 exports.allowRoles = (...roles) => {
     return (req, res, next) => {
+
+        if (!req.user)
+            return res.status(401).json({ error: "Not authenticated" });
+
         if (!roles.includes(req.user.role))
-            return res.status(403).json({ error: "Forbidden: insufficient permission" });
+            return res.status(403).json({ error: "Forbidden: Access denied" });
 
         next();
     };

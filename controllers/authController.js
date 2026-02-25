@@ -2,11 +2,25 @@ const db = require("../config/mysql");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const SECRET = process.env.JWT_SECRET || "railway_secret";
 
-// REGISTER
+
+// ================= REGISTER USER =================
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role = "user", station_access = null } = req.body;
+
+    if (!name || !email || !password)
+      return res.status(400).json({ message: "Missing fields" });
+
+    // check existing email
+    const [exists] = await db.query(
+      "SELECT id FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (exists.length > 0)
+      return res.status(400).json({ message: "Email already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
 
@@ -15,7 +29,7 @@ exports.register = async (req, res) => {
       [name, email, hashed, role, station_access]
     );
 
-    res.json({ message: "User registered successfully" });
+    res.json({ message: "User created successfully" });
 
   } catch (err) {
     console.error(err);
@@ -24,7 +38,8 @@ exports.register = async (req, res) => {
 };
 
 
-// LOGIN
+
+// ================= LOGIN =================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -44,20 +59,18 @@ exports.login = async (req, res) => {
     if (!match)
       return res.status(401).json({ message: "Invalid password" });
 
-    // JWT now contains role
+    // Create JWT
     const token = jwt.sign(
       {
         id: user.id,
-        email: user.email,
         role: user.role,
         station: user.station_access
       },
-      process.env.JWT_SECRET || "railway_secret",
+      SECRET,
       { expiresIn: "7d" }
     );
 
     res.json({
-      message: "Login success",
       token,
       role: user.role,
       station: user.station_access,
