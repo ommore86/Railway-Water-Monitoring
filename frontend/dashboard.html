@@ -1,87 +1,84 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <div class="text-end mb-2">
-        <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
-    </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Railway Water Monitoring</title>
+<link rel="stylesheet" href="css/style.css">
 
-    <title>Railway Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* fallback styling if css not loaded */
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f6fa;margin:0}
+.topbar{background:#0d6efd;color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+.topbar button{background:#fff;color:#0d6efd;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:bold}
 
-    <div id="alertBox" class="alert alert-danger d-none">
-        ⚠️ Refill Required in Some Coaches!
-    </div>
+.cards{display:flex;gap:20px;padding:20px}
+.card{flex:1;background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.good{border-left:8px solid #28a745}
+.warning{border-left:8px solid #ffc107}
+.danger{border-left:8px solid #dc3545}
+.card p{font-size:28px;margin:10px 0 0}
 
-    <div class="card p-3 mb-4">
-        <h5>Urgent Refill List</h5>
-        <ul id="refillList" class="mb-0"></ul>
-    </div>
+.table-section{padding:20px}
+table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden}
+th,td{padding:12px;text-align:center;border-bottom:1px solid #eee}
+th{background:#0d6efd;color:white}
+.goodText{color:#28a745;font-weight:bold}
+.low{color:#ffc107;font-weight:bold}
+.critical{color:#dc3545;font-weight:bold;animation:blink 1s infinite}
 
-    <style>
-        body {
-            background: #eef2f7;
-        }
-
-        .card {
-            border-radius: 15px;
-        }
-
-        .low {
-            background: #ff4d4d;
-            color: white;
-        }
-
-        .medium {
-            background: #ffc107;
-        }
-
-        .high {
-            background: #28a745;
-            color: white;
-        }
-
-        .blink {
-            animation: blinkAnim 1s infinite;
-        }
-
-        @keyframes blinkAnim {
-            0% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: 0.3
-            }
-
-            100% {
-                opacity: 1
-            }
-        }
-    </style>
+@keyframes blink{
+  50%{opacity:0.3}
+}
+</style>
 </head>
 
-<body class="p-4">
+<body>
 
-    <h2 class="mb-4">🚆 Railway Water Monitoring Dashboard</h2>
+<header class="topbar">
+  <h2>🚆 Railway Water Monitoring Dashboard</h2>
+  <button onclick="logout()">Logout</button>
+</header>
 
-    <div class="row mb-4">
-        <div class="col">
-            <select id="stationSelect" class="form-select"></select>
-        </div>
+<section class="cards">
+  <div class="card good">
+    <h3>Healthy Coaches</h3>
+    <p id="healthyCount">0</p>
+  </div>
 
-        <div class="col">
-            <select id="trainSelect" class="form-select"></select>
-        </div>
+  <div class="card warning">
+    <h3>Low Water</h3>
+    <p id="lowCount">0</p>
+  </div>
 
-        <div class="col">
-            <button onclick="loadCoaches()" class="btn btn-primary w-100">Show Coaches</button>
-        </div>
-    </div>
+  <div class="card danger">
+    <h3>Critical</h3>
+    <p id="criticalCount">0</p>
+  </div>
+</section>
 
-    <div id="coachContainer" class="row g-3"></div>
+<section class="table-section">
+  <h2>Live Coach Water Status</h2>
 
-    <script src="js/dashboard.js"></script>
+  <table>
+    <thead>
+      <tr>
+        <th>Station</th>
+        <th>Train</th>
+        <th>Coach</th>
+        <th>Water Level</th>
+        <th>Status</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+
+    <tbody id="dataTable">
+      <!-- rows will come from JS -->
+    </tbody>
+
+  </table>
+</section>
+
+<script src="js/dashboard.js"></script>
 </body>
-
 </html>

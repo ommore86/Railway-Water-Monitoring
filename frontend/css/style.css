@@ -1,0 +1,67 @@
+body{
+margin:0;
+font-family:Segoe UI;
+background:#0f172a;
+color:white;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 25px;
+background:#020617;
+border-bottom:2px solid #1e293b;
+}
+
+.topbar h1{
+margin:0;
+font-size:22px;
+}
+
+.topbar button{
+background:#ef4444;
+border:none;
+color:white;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.cards{
+display:flex;
+gap:20px;
+padding:20px;
+}
+
+.card{
+flex:1;
+padding:20px;
+border-radius:10px;
+text-align:center;
+font-size:20px;
+}
+
+.good{ background:#065f46;}
+.warning{ background:#92400e;}
+.danger{ background:#7f1d1d;}
+
+.table-section{
+padding:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#020617;
+}
+
+th,td{
+padding:12px;
+text-align:center;
+border-bottom:1px solid #1e293b;
+}
+
+.low{color:orange;}
+.critical{color:red; font-weight:bold;}
+.goodText{color:lightgreen;}
