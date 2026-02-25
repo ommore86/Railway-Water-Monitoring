@@ -48,7 +48,7 @@ exports.addSensorData = async (req, res) => {
        ON DUPLICATE KEY UPDATE
        water_level = VALUES(water_level),
        received_at = CURRENT_TIMESTAMP`,
-      [station_number, train_number, coach_number, water_level]
+      [station_code, train_number, coach_number, water_level]
     );
 
     res.json({ message: "Data stored/updated successfully" });
