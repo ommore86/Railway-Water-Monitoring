@@ -1,69 +1,56 @@
 const API = "https://railway-water-backend.onrender.com/api/latest";
 
 async function loadData(){
-try{
-const res = await fetch(API);
-const data = await res.json();
+  try{
+    const res = await fetch(API);
 
-```
-const table = document.getElementById("dataTable");
-table.innerHTML="";
+    if(!res.ok) throw new Error("Server not responding");
 
-let healthy=0, low=0, critical=0;
+    const data = await res.json();
 
-data.forEach(row => {
+    const table = document.getElementById("dataTable");
+    table.innerHTML="";
 
-let status="Healthy";
-let cls="goodText";
+    let healthy=0, low=0, critical=0;
 
-if(row.water_level < 50){
-status="Low";
-cls="low";
-low++;
-}
+    data.forEach(row=>{
+      let status="Healthy";
+      let cls="goodText";
 
-if(row.water_level < 25){
-status="CRITICAL";
-cls="critical";
-critical++;
-}
+      if(row.water_level<50){
+        status="Low";
+        cls="low";
+        low++;
+      }
 
-if(row.water_level >= 50) healthy++;
+      if(row.water_level<25){
+        status="CRITICAL";
+        cls="critical";
+        critical++;
+      }
 
-const tr = document.createElement("tr");
+      if(row.water_level>=50) healthy++;
 
-function cell(text, className=""){
-const td=document.createElement("td");
-td.textContent=text;
-if(className) td.className=className;
-return td;
-}
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${row.station_number}</td>
+        <td>${row.train_name || row.train_number}</td>
+        <td>${row.coach_number}</td>
+        <td>${row.water_level}%</td>
+        <td class="${cls}">${status}</td>
+        <td>${new Date(row.received_at).toLocaleTimeString()}</td>
+      `;
+      table.appendChild(tr);
+    });
 
-tr.appendChild(cell(row.station_number));
-tr.appendChild(cell(row.train_name || "-"));
-tr.appendChild(cell(row.coach_number || "-"));
-tr.appendChild(cell(row.water_level + "%"));
-tr.appendChild(cell(status, cls));
-tr.appendChild(cell(new Date(row.received_at).toLocaleTimeString()));
+    document.getElementById("healthyCount").innerText=healthy;
+    document.getElementById("lowCount").innerText=low;
+    document.getElementById("criticalCount").innerText=critical;
 
-table.appendChild(tr);
-});
-
-
-document.getElementById("healthyCount").innerText=healthy;
-document.getElementById("lowCount").innerText=low;
-document.getElementById("criticalCount").innerText=critical;
-```
-
-}catch(e){
-console.error("Fetch error",e);
-}
+  }catch(e){
+    console.log("Fetch error",e);
+  }
 }
 
 setInterval(loadData,3000);
 loadData();
-
-function logout(){
-localStorage.removeItem("token");
-window.location.href="login.html";
-}
