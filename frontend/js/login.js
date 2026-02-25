@@ -15,12 +15,24 @@ async function login() {
 
     const data = await res.json();
 
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
-      window.location.href = "dashboard.html";
-    } else {
+    if (!res.ok) {
       alert(data.message || "Login failed");
+      return;
     }
+
+    // store session
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.role);
+    localStorage.setItem("station", data.station || "");
+    localStorage.setItem("name", data.name);
+
+    // role based redirect
+    if (data.role === "superadmin")
+      window.location.href = "superadmin.html";
+    else if (data.role === "admin")
+      window.location.href = "admin.html";
+    else
+      window.location.href = "dashboard.html";
 
   } catch (err) {
     alert("Server not reachable");

@@ -11,14 +11,14 @@ exports.addSensorData = async (req, res) => {
       water_level
     } = req.body;
 
-    // match DB column names
     const station_number = station_code;
 
     // ---------- 1) Station ----------
     await db.query(
       `INSERT INTO stations (station_number, station_name)
        VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE station_name = VALUES(station_name)`,
+       ON DUPLICATE KEY UPDATE 
+       station_name = VALUES(station_name)`,
       [station_number, station_name]
     );
 
@@ -26,7 +26,8 @@ exports.addSensorData = async (req, res) => {
     await db.query(
       `INSERT INTO trains (train_number, train_name)
        VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE train_name = VALUES(train_name)`,
+       ON DUPLICATE KEY UPDATE 
+       train_name = VALUES(train_name)`,
       [train_number, train_name]
     );
 
@@ -34,19 +35,23 @@ exports.addSensorData = async (req, res) => {
     await db.query(
       `INSERT INTO coaches (coach_number, train_number)
        VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE train_number = VALUES(train_number)`,
+       ON DUPLICATE KEY UPDATE 
+       train_number = VALUES(train_number)`,
       [coach_number, train_number]
     );
 
-    // ---------- 4) Sensor reading ----------
+    // ---------- 4) Sensor Data (UPSERT — prevents duplicates) ----------
     await db.query(
       `INSERT INTO sensor_data
        (station_number, train_number, coach_number, water_level)
-       VALUES (?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+       water_level = VALUES(water_level),
+       received_at = CURRENT_TIMESTAMP`,
       [station_number, train_number, coach_number, water_level]
     );
 
-    res.json({ message: "Data stored successfully" });
+    res.json({ message: "Data stored/updated successfully" });
 
   } catch (err) {
     console.error("MYSQL ERROR:", err);
