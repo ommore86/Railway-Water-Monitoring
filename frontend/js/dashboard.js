@@ -170,3 +170,37 @@ async function createUser() {
     console.log("Create user error", e);
   }
 }
+
+/* ADD TRAIN */
+async function addTrain(){
+  const train_number=document.getElementById("train_no").value;
+  const train_name=document.getElementById("train_name").value;
+
+  const res=await fetch("https://railway-water-backend.onrender.com/api/master/train",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:JSON.stringify({train_number,train_name})
+  });
+
+  alert((await res.json()).message||"Done");
+}
+
+/* ADD STATION */
+async function addStation(){
+  const station_number=document.getElementById("station_no").value;
+  const station_name=document.getElementById("station_name").value;
+
+  const res=await fetch("https://railway-water-backend.onrender.com/api/master/station",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:JSON.stringify({station_number,station_name})
+  });
+
+  alert((await res.json()).message||"Done");
+}
