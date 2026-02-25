@@ -1,4 +1,4 @@
-const API = "https://railway-water-backend.onrender.com/api/";
+const API = "https://railway-water-backend.onrender.com/api/latest";
 
 async function loadData(){
 try{
