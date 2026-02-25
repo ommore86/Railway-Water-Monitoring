@@ -2,26 +2,28 @@ const jwt = require("jsonwebtoken");
 
 const SECRET = process.env.JWT_SECRET || "railway_secret";
 
-// verify login token
+// VERIFY TOKEN
 exports.verifyToken = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+    let token = req.headers.authorization;
 
-    if (!authHeader)
+    if (!token)
         return res.status(401).json({ error: "No token provided" });
 
-    try {
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, SECRET);
+    // remove Bearer if present
+    if (token.startsWith("Bearer "))
+        token = token.slice(7, token.length);
 
+    try {
+        const decoded = jwt.verify(token, SECRET);
         req.user = decoded;
         next();
-
     } catch (err) {
-        return res.status(401).json({ error: "Invalid or expired token" });
+        console.log("JWT ERROR:", err.message);
+        return res.status(401).json({ error: "Invalid token" });
     }
 };
 
-// allow only specific roles
+// ROLE CHECK
 exports.allowRoles = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role))

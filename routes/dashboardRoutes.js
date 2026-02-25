@@ -7,28 +7,29 @@ const { verifyToken } = require("../middleware/authMiddleware");
 router.get("/latest", verifyToken, async (req, res) => {
   try {
 
-    // ROLE BASED FILTERING
     let query = `
       SELECT 
-        station_number,
-        train_number,
-        coach_number,
-        water_level,
-        received_at
-      FROM sensor_data
+        s.station_number,
+        t.train_name,
+        s.train_number,
+        s.coach_number,
+        s.water_level,
+        s.received_at
+      FROM sensor_data s
+      LEFT JOIN trains t 
+        ON s.train_number = t.train_number
     `;
 
-    let params = [];
-
-    // if normal user → only his station data
-    if (req.user.role === "user" && req.user.station) {
-      query += " WHERE station_number = ?";
-      params.push(req.user.station);
+    // USER sees only own station
+    if(req.user.role === "user"){
+      query += ` WHERE s.station_number = ? ORDER BY s.received_at DESC LIMIT 50`;
+      const [rows] = await db.query(query,[req.user.station]);
+      return res.json(rows);
     }
 
-    query += " ORDER BY received_at DESC LIMIT 50";
-
-    const [rows] = await db.query(query, params);
+    // ADMIN & SUPERADMIN see all
+    query += ` ORDER BY s.received_at DESC LIMIT 50`;
+    const [rows] = await db.query(query);
 
     res.json(rows);
 
