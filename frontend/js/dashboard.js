@@ -2,12 +2,32 @@ const API = "https://railway-water-backend.onrender.com/api/latest";
 
 // SESSION DATA
 const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+const role = (localStorage.getItem("role") || "").toLowerCase();
 
 // NOT LOGGED IN
 if (!token) {
   window.location.href = "login.html";
 }
+
+// ---------------- START APP AFTER PAGE LOAD ----------------
+document.addEventListener("DOMContentLoaded", () => {
+
+  console.log("Logged in as:", role);
+
+  // show admin panel
+  if (role === "admin" || role === "superadmin" || role === "super_admin") {
+    const panel = document.getElementById("adminPanel");
+    if (panel) {
+      panel.style.display = "block";
+      loadUsers();
+    }
+  }
+
+  // START LIVE DATA (THIS WAS MISSING)
+  loadData();
+  setInterval(loadData, 3000);
+});
+
 
 // ---------------- LOAD WATER DATA ----------------
 async function loadData() {
@@ -16,12 +36,10 @@ async function loadData() {
     const res = await fetch(API, {
       method: "GET",
       headers: {
-        "Authorization": "Bearer " + token,
-        "Content-Type": "application/json"
+        "Authorization": "Bearer " + token
       }
     });
 
-    // SESSION EXPIRED
     if (res.status === 401) {
       alert("Session expired. Please login again.");
       localStorage.clear();
@@ -30,6 +48,8 @@ async function loadData() {
     }
 
     const data = await res.json();
+
+    console.log("Water Data:", data);
 
     const table = document.getElementById("dataTable");
     if (!table) return;
@@ -80,29 +100,13 @@ async function loadData() {
   }
 }
 
+
 // ---------------- LOGOUT ----------------
 function logout() {
   localStorage.clear();
   window.location.href = "login.html";
 }
 
-
-// ---------------- ROLE BASED UI ----------------
-// ROLE BASED UI
-document.addEventListener("DOMContentLoaded", () => {
-
-  const role = (localStorage.getItem("role") || "").toLowerCase();
-
-  console.log("Logged in as role:", role);
-
-  if (role === "admin" || role === "superadmin" || role === "super_admin") {
-      const panel = document.getElementById("adminPanel");
-      if(panel){
-        panel.style.display = "block";
-        loadUsers();
-      }
-  }
-});
 
 // ---------------- LOAD USERS ----------------
 async function loadUsers() {
@@ -111,9 +115,9 @@ async function loadUsers() {
       headers: { Authorization: "Bearer " + token }
     });
 
-    if (!res.ok) return;
-
     const users = await res.json();
+
+    console.log("Users:", users);
 
     const table = document.getElementById("usersTable");
     if (!table) return;
@@ -148,30 +152,22 @@ async function createUser() {
     station_access: document.getElementById("u_station").value
   };
 
-  try {
-    const res = await fetch("https://railway-water-backend.onrender.com/api/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify(body)
-    });
+  const res = await fetch("https://railway-water-backend.onrender.com/api/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(body)
+  });
 
-    if (!res.ok) {
-      alert("User creation failed");
-      return;
-    }
-
-    alert("User Created Successfully");
-    loadUsers();
-
-  } catch (e) {
-    console.log("Create user error", e);
-  }
+  const data = await res.json();
+  alert(data.message || "Done");
+  loadUsers();
 }
 
-/* ADD TRAIN */
+
+// ---------------- ADD TRAIN ----------------
 async function addTrain(){
   const train_number=document.getElementById("train_no").value;
   const train_name=document.getElementById("train_name").value;
@@ -188,7 +184,8 @@ async function addTrain(){
   alert((await res.json()).message||"Done");
 }
 
-/* ADD STATION */
+
+// ---------------- ADD STATION ----------------
 async function addStation(){
   const station_number=document.getElementById("station_no").value;
   const station_name=document.getElementById("station_name").value;

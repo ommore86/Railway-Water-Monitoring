@@ -70,9 +70,16 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    const normalizedRole =
+      user.role === "superadmin" || user.role === "super_admin"
+        ? "super_admin"
+        : user.role === "admin"
+          ? "admin"
+          : "user";
+
     res.json({
       token,
-      role: user.role,
+      role: normalizedRole,
       station: user.station_access,
       name: user.name
     });
