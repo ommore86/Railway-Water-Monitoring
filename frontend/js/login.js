@@ -1,8 +1,13 @@
 const API = "https://railway-water-backend.onrender.com/api";
 
 async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
 
   try {
     const res = await fetch(`${API}/auth/login`, {
@@ -16,23 +21,17 @@ async function login() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.message || "Login failed");
+      alert(data.message || "Invalid login");
       return;
     }
 
-    // store session
+    // ===== STORE SESSION =====
     localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);
-    localStorage.setItem("station", data.station || "");
     localStorage.setItem("name", data.name);
 
-    // role based redirect
-    if (data.role === "superadmin")
-      window.location.href = "superadmin.html";
-    else if (data.role === "admin")
-      window.location.href = "admin.html";
-    else
-      window.location.href = "dashboard.html";
+    // ⭐ ALL ROLES GO TO SAME DASHBOARD
+    window.location.href = "dashboard.html";
 
   } catch (err) {
     alert("Server not reachable");
