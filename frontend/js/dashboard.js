@@ -1,30 +1,25 @@
 const API = "https://railway-water-backend.onrender.com/api/latest";
 
+// get stored token
 const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
-const name = localStorage.getItem("name");
 
-// not logged in
-if (!token) {
-  window.location.href = "login.html";
+// if not logged in
+if(!token){
+  window.location.href="login.html";
 }
-
-// show logged user name
-document.addEventListener("DOMContentLoaded", () => {
-  const topbar = document.querySelector(".topbar h2");
-  if (topbar) topbar.innerText += " | " + name + " (" + role + ")";
-});
 
 async function loadData(){
   try{
+
     const res = await fetch(API,{
       headers:{
-        "Authorization": "Bearer " + token
+        "Authorization":"Bearer " + token
       }
     });
 
-    if(res.status === 401){
+    if(res.status===401){
       localStorage.clear();
+      alert("Session expired. Login again");
       window.location.href="login.html";
       return;
     }
@@ -77,10 +72,10 @@ async function loadData(){
   }
 }
 
+setInterval(loadData,3000);
+loadData();
+
 function logout(){
   localStorage.clear();
   window.location.href="login.html";
 }
-
-setInterval(loadData,3000);
-loadData();
