@@ -1,13 +1,15 @@
 const API = "https://railway-water-backend.onrender.com/api/latest";
 
-// get token from login
+// SESSION DATA
 const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
 
-// if not logged in -> go back to login
+// NOT LOGGED IN
 if (!token) {
   window.location.href = "login.html";
 }
 
+// ---------------- LOAD WATER DATA ----------------
 async function loadData() {
   try {
 
@@ -19,6 +21,7 @@ async function loadData() {
       }
     });
 
+    // SESSION EXPIRED
     if (res.status === 401) {
       alert("Session expired. Please login again.");
       localStorage.clear();
@@ -29,6 +32,8 @@ async function loadData() {
     const data = await res.json();
 
     const table = document.getElementById("dataTable");
+    if (!table) return;
+
     table.innerHTML = "";
 
     let healthy = 0, low = 0, critical = 0;
@@ -75,63 +80,92 @@ async function loadData() {
   }
 }
 
-// logout button
+// ---------------- LOGOUT ----------------
 function logout() {
   localStorage.clear();
   window.location.href = "login.html";
 }
 
-setInterval(loadData, 3000);
-loadData();
 
-// ROLE BASED UI
-const role = localStorage.getItem("role");
+// ---------------- ROLE BASED UI ----------------
+document.addEventListener("DOMContentLoaded", async () => {
 
-if(role==="admin" || role==="super_admin"){
-  document.getElementById("adminPanel").style.display="block";
-  loadUsers();
+  // Start live data only after page ready
+  loadData();
+  setInterval(loadData, 3000);
+
+  // ADMIN PANEL
+  if (role === "admin" || role === "super_admin") {
+    const panel = document.getElementById("adminPanel");
+    if (panel) panel.style.display = "block";
+    await loadUsers();
+  }
+});
+
+
+// ---------------- LOAD USERS ----------------
+async function loadUsers() {
+  try {
+    const res = await fetch("https://railway-water-backend.onrender.com/api/users", {
+      headers: { Authorization: "Bearer " + token }
+    });
+
+    if (!res.ok) return;
+
+    const users = await res.json();
+
+    const table = document.getElementById("usersTable");
+    if (!table) return;
+
+    table.innerHTML = "";
+
+    users.forEach(u => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${u.role}</td>
+        <td>${u.station_access || "-"}</td>
+      `;
+      table.appendChild(tr);
+    });
+
+  } catch (e) {
+    console.log("User load error", e);
+  }
 }
 
-// LOAD USERS
-async function loadUsers(){
-  const res=await fetch("https://railway-water-backend.onrender.com/api/users",{
-    headers:{Authorization:"Bearer "+token}
-  });
-  const users=await res.json();
 
-  const table=document.getElementById("usersTable");
-  table.innerHTML="";
+// ---------------- CREATE USER ----------------
+async function createUser() {
 
-  users.forEach(u=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${u.name}</td>
-      <td>${u.email}</td>
-      <td>${u.role}</td>
-      <td>${u.station_access||"-"}</td>
-    `;
-    table.appendChild(tr);
-  });
-}
-
-// CREATE USER
-async function createUser(){
-  const body={
-    name:document.getElementById("u_name").value,
-    email:document.getElementById("u_email").value,
-    password:document.getElementById("u_pass").value,
-    role:document.getElementById("u_role").value,
-    station_access:document.getElementById("u_station").value
+  const body = {
+    name: document.getElementById("u_name").value,
+    email: document.getElementById("u_email").value,
+    password: document.getElementById("u_pass").value,
+    role: document.getElementById("u_role").value,
+    station_access: document.getElementById("u_station").value
   };
 
-  await fetch("https://railway-water-backend.onrender.com/api/users",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+token
-    },
-    body:JSON.stringify(body)
-  });
+  try {
+    const res = await fetch("https://railway-water-backend.onrender.com/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(body)
+    });
 
-  loadUsers();
+    if (!res.ok) {
+      alert("User creation failed");
+      return;
+    }
+
+    alert("User Created Successfully");
+    loadUsers();
+
+  } catch (e) {
+    console.log("Create user error", e);
+  }
 }
