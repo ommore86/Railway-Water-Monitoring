@@ -1,56 +1,35 @@
-// ================= CONFIG =================
 const API = "https://railway-water-backend.onrender.com/api/latest";
+
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
 const name = localStorage.getItem("name");
 
-// ================= SECURITY =================
+// not logged in
 if (!token) {
   window.location.href = "login.html";
 }
 
-// ================= ROLE BASED UI =================
-window.onload = () => {
+// show logged user name
+document.addEventListener("DOMContentLoaded", () => {
+  const topbar = document.querySelector(".topbar h2");
+  if (topbar) topbar.innerText += " | " + name + " (" + role + ")";
+});
 
-  // show username
-  const title = document.querySelector(".topbar h2");
-  if (title && name) title.innerText += " - " + name;
-
-  // create admin buttons dynamically
-  if (role === "admin" || role === "super_admin") {
-    const btn = document.createElement("button");
-    btn.innerText = "User Management";
-    btn.onclick = () => window.location.href = "users.html";
-    btn.style.marginRight = "10px";
-
-    document.querySelector(".topbar").prepend(btn);
-  }
-
-  if (role === "super_admin") {
-    const btn2 = document.createElement("button");
-    btn2.innerText = "Admin Panel";
-    btn2.onclick = () => alert("Super Admin Controls Coming");
-    btn2.style.marginRight = "10px";
-
-    document.querySelector(".topbar").prepend(btn2);
-  }
-};
-
-
-// ================= FETCH DATA =================
 async function loadData(){
   try{
     const res = await fetch(API,{
       headers:{
-        "Authorization":"Bearer "+token
+        "Authorization": "Bearer " + token
       }
     });
 
-    if(res.status===401){
+    if(res.status === 401){
       localStorage.clear();
       window.location.href="login.html";
       return;
     }
+
+    if(!res.ok) throw new Error("Server not responding");
 
     const data = await res.json();
 
@@ -98,14 +77,10 @@ async function loadData(){
   }
 }
 
-
-// ================= AUTO REFRESH =================
-setInterval(loadData,3000);
-loadData();
-
-
-// ================= LOGOUT =================
 function logout(){
   localStorage.clear();
   window.location.href="login.html";
 }
+
+setInterval(loadData,3000);
+loadData();
