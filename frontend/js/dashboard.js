@@ -83,3 +83,55 @@ function logout() {
 
 setInterval(loadData, 3000);
 loadData();
+
+// ROLE BASED UI
+const role = localStorage.getItem("role");
+
+if(role==="admin" || role==="super_admin"){
+  document.getElementById("adminPanel").style.display="block";
+  loadUsers();
+}
+
+// LOAD USERS
+async function loadUsers(){
+  const res=await fetch("https://railway-water-backend.onrender.com/api/users",{
+    headers:{Authorization:"Bearer "+token}
+  });
+  const users=await res.json();
+
+  const table=document.getElementById("usersTable");
+  table.innerHTML="";
+
+  users.forEach(u=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${u.name}</td>
+      <td>${u.email}</td>
+      <td>${u.role}</td>
+      <td>${u.station_access||"-"}</td>
+    `;
+    table.appendChild(tr);
+  });
+}
+
+// CREATE USER
+async function createUser(){
+  const body={
+    name:document.getElementById("u_name").value,
+    email:document.getElementById("u_email").value,
+    password:document.getElementById("u_pass").value,
+    role:document.getElementById("u_role").value,
+    station_access:document.getElementById("u_station").value
+  };
+
+  await fetch("https://railway-water-backend.onrender.com/api/users",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:JSON.stringify(body)
+  });
+
+  loadUsers();
+}
