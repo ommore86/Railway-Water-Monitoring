@@ -213,13 +213,19 @@
 
       <h3 class="mt-4">Update Existing User</h3>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <input id="edit_id" placeholder="User ID">
+
+        <input id="edit_email" placeholder="User Email">
+        <input id="edit_name" placeholder="New Name">
+
         <select id="edit_role">
+          <option value="">Keep Role Same</option>
           <option value="user">User</option>
           <option value="admin">Admin</option>
         </select>
-        <input id="edit_station" placeholder="New Station">
+
+        <input id="edit_station" placeholder="New Station (optional)">
         <button onclick="updateUser()">Update User</button>
+
       </div>
     </div>
 
@@ -239,30 +245,35 @@
 
     <h2>Master Data</h2>
 
-    <div style="margin-top:15px">
-      <h3>Add Train</h3>
-      <input id="train_no" placeholder="Train Number">
-      <input id="train_name" placeholder="Train Name">
-      <button onclick="addTrain()">Add Train</button>
+    <div style="display:flex;gap:40px;margin-top:20px">
+
+      <!-- LEFT SIDE : TRAIN -->
+      <div style="flex:1;background:white;padding:15px;border-radius:10px">
+        <h3>Add Train</h3>
+        <input id="train_no" placeholder="Train Number">
+        <input id="train_name" placeholder="Train Name">
+        <button onclick="addTrain()">Add Train</button>
+
+        <h3 style="margin-top:20px">Update Train</h3>
+        <input id="edit_train_no" placeholder="Train Number">
+        <input id="edit_train_name" placeholder="New Name">
+        <button onclick="updateTrain()">Update Train</button>
+      </div>
+
+      <!-- RIGHT SIDE : STATION -->
+      <div style="flex:1;background:white;padding:15px;border-radius:10px">
+        <h3>Add Station</h3>
+        <input id="station_no" placeholder="Station Number">
+        <input id="station_name" placeholder="Station Name">
+        <button onclick="addStation()">Add Station</button>
+
+        <h3 style="margin-top:20px">Update Station</h3>
+        <input id="edit_station_no" placeholder="Station Number">
+        <input id="edit_station_name" placeholder="New Name">
+        <button onclick="updateStation()">Update Station</button>
+      </div>
     </div>
-
-    <h3 class="mt-3">Update Train</h3>
-    <input id="edit_train_no" placeholder="Train Number">
-    <input id="edit_train_name" placeholder="New Name">
-    <button onclick="updateTrain()">Update Train</button>
-
-    <div style="margin-top:15px">
-      <h3>Add Station</h3>
-      <input id="station_no" placeholder="Station Number">
-      <input id="station_name" placeholder="Station Name">
-      <button onclick="addStation()">Add Station</button>
-    </div>
-
-    <h3 class="mt-3">Update Station</h3>
-    <input id="edit_station_no" placeholder="Station Number">
-    <input id="edit_station_name" placeholder="New Name">
-    <button onclick="updateStation()">Update Station</button>
-
+    
   </section>
 
   <script src="js/dashboard.js?v=2"></script>

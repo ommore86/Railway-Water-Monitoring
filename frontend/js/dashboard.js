@@ -1,5 +1,7 @@
 const BASE = "https://railway-water-backend.onrender.com/api";
 let currentFilter = "";
+let firstLoad = true;
+let refreshTimer = null;
 
 // session
 const token = localStorage.getItem("token");
@@ -13,8 +15,18 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loginInfo").innerText =
     `👤 ${name} (${role}) - ${localStorage.getItem("email")}`;
 
+  // initial load
   loadData();
   loadUsersIfAdmin();
+
+  // prevent multiple timers (important)
+  if (refreshTimer) clearInterval(refreshTimer);
+
+  // auto refresh every 5 seconds using SAME FILTER
+  refreshTimer = setInterval(() => {
+    loadData(currentFilter);
+  }, 5000);
+
 });
 
 
@@ -88,16 +100,15 @@ function clearFilter() {
 // ---------------- DROPDOWNS ----------------
 function populateFilters(stations, trains) {
 
+  if (!firstLoad) return;
+
   const s = document.getElementById("filterStation");
   const t = document.getElementById("filterTrain");
 
-  if (s.options.length === 1) {
-    stations.forEach(v => s.innerHTML += `<option value="${v}">${v}</option>`);
-  }
+  stations.forEach(v => s.innerHTML += `<option value="${v}">${v}</option>`);
+  trains.forEach(v => t.innerHTML += `<option value="${v}">${v}</option>`);
 
-  if (t.options.length === 1) {
-    trains.forEach(v => t.innerHTML += `<option value="${v}">${v}</option>`);
-  }
+  firstLoad = false;
 }
 
 
@@ -133,17 +144,25 @@ async function loadUsers() {
 /* ---------------- UPDATE USER ---------------- */
 async function updateUser() {
 
-  const id = document.getElementById("edit_id").value;
+  const email = document.getElementById("edit_email").value;
+  const name = document.getElementById("edit_name").value;
   const role = document.getElementById("edit_role").value;
   const station = document.getElementById("edit_station").value;
 
-  const res = await fetch(`${BASE}/users/${id}`, {
+  if (!email) return alert("Email required");
+
+  const res = await fetch(`${BASE}/users/update-by-email`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
-    body: JSON.stringify({ role, station_access: station })
+    body: JSON.stringify({
+      email,
+      name,
+      role,
+      station_access: station
+    })
   });
 
   alert((await res.json()).message);
@@ -191,3 +210,8 @@ function logout() {
   localStorage.clear();
   window.location.href = "login.html";
 }
+
+// stop interval when page closed
+window.addEventListener("beforeunload", () => {
+  if (refreshTimer) clearInterval(refreshTimer);
+});
