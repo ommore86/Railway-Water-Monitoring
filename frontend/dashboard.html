@@ -118,7 +118,10 @@
 
   <header class="topbar">
     <h2>🚆 Railway Water Monitoring Dashboard</h2>
-    <button onclick="logout()">Logout</button>
+    <div>
+      <span id="loginInfo"></span>
+      <button onclick="logout()">Logout</button>
+    </div>
   </header>
 
 
@@ -144,6 +147,21 @@
   <!-- ===== WATER DATA ===== -->
   <section class="table-section">
     <h2>Live Coach Water Status</h2>
+
+    <div style="margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap">
+
+      <select id="filterStation">
+        <option value="">All Stations</option>
+      </select>
+
+      <select id="filterTrain">
+        <option value="">All Trains</option>
+      </select>
+
+      <button onclick="applyFilter()">Apply Filter</button>
+      <button onclick="clearFilter()">Clear</button>
+
+    </div>
 
     <table>
       <thead>
