@@ -18,6 +18,7 @@ async function login() {
   localStorage.setItem("token",data.token);
   localStorage.setItem("role",data.role);
   localStorage.setItem("name",data.name);
+  localStorage.setItem("email", email);
   localStorage.setItem("email",data.email);
   localStorage.setItem("station",data.station||"");
 

@@ -6,16 +6,17 @@ const { verifyToken, allowRoles } = require("../middleware/authMiddleware");
 
 /* GET USERS */
 router.get("/", verifyToken, allowRoles("admin","super_admin"), async (req,res)=>{
-  let query="SELECT id,name,email,role,station_access FROM users";
-  let params=[];
+  try{
+    const [rows] = await db.query(
+      "SELECT id,name,email,role,station_access FROM users ORDER BY id DESC"
+    );
 
-  if(req.user.role==="admin"){
-    query+=" WHERE station_access=?";
-    params.push(req.user.station);
+    res.json(rows);
+
+  }catch(err){
+    console.error(err);
+    res.status(500).json({error:"Failed to fetch users"});
   }
-
-  const [rows]=await db.query(query,params);
-  res.json(rows);
 });
 
 
@@ -34,15 +35,29 @@ router.post("/", verifyToken, allowRoles("admin","super_admin"), async (req,res)
 
 
 /* UPDATE USER */
-router.put("/:id", verifyToken, allowRoles("admin","super_admin"), async (req,res)=>{
-  const {role,station_access}=req.body;
+/* UPDATE USER BY EMAIL */
+router.put("/by-email", verifyToken, allowRoles("admin","super_admin"), async (req,res)=>{
+  try{
 
-  await db.query(
-    "UPDATE users SET role=?, station_access=? WHERE id=?",
-    [role,station_access,req.params.id]
-  );
+    const {email,name,role,station_access}=req.body;
 
-  res.json({message:"User updated"});
+    if(!email)
+      return res.status(400).json({error:"Email required"});
+
+    const [result] = await db.query(
+      "UPDATE users SET name=?, role=?, station_access=? WHERE email=?",
+      [name,role,station_access,email]
+    );
+
+    if(result.affectedRows===0)
+      return res.status(404).json({error:"User not found"});
+
+    res.json({message:"User updated successfully"});
+
+  }catch(err){
+    console.error(err);
+    res.status(500).json({error:"Update failed"});
+  }
 });
 
 module.exports=router;
