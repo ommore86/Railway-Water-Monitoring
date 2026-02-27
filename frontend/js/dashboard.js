@@ -11,7 +11,7 @@ if (!token) window.location.href = "login.html";
 document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("loginInfo").innerText =
-    `👤 ${name} (${role})`;
+    `👤 ${name} (${role}) - ${localStorage.getItem("email")}`;
 
   loadData();
   loadUsersIfAdmin();
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // ---------------- LOAD WATER DATA ----------------
-async function loadData(query="") {
+async function loadData(query = "") {
 
   const res = await fetch(`${BASE}/latest${query}`, {
     headers: { Authorization: "Bearer " + token }
@@ -30,26 +30,26 @@ async function loadData(query="") {
   const table = document.getElementById("dataTable");
   table.innerHTML = "";
 
-  let healthy=0, low=0, critical=0;
+  let healthy = 0, low = 0, critical = 0;
 
-  const stations=new Set();
-  const trains=new Set();
+  const stations = new Set();
+  const trains = new Set();
 
   data.forEach(row => {
 
     stations.add(row.station_number);
     trains.add(row.train_number);
 
-    let status="Healthy",cls="goodText";
+    let status = "Healthy", cls = "goodText";
 
-    if(row.water_level<50){status="Low";cls="low";low++;}
-    if(row.water_level<25){status="CRITICAL";cls="critical";critical++;}
-    if(row.water_level>=50)healthy++;
+    if (row.water_level < 50) { status = "Low"; cls = "low"; low++; }
+    if (row.water_level < 25) { status = "CRITICAL"; cls = "critical"; critical++; }
+    if (row.water_level >= 50) healthy++;
 
-    table.innerHTML+=`
+    table.innerHTML += `
       <tr>
         <td>${row.station_number}</td>
-        <td>${row.train_name||row.train_number}</td>
+        <td>${row.train_name || row.train_number}</td>
         <td>${row.coach_number}</td>
         <td>${row.water_level}%</td>
         <td class="${cls}">${status}</td>
@@ -57,82 +57,137 @@ async function loadData(query="") {
       </tr>`;
   });
 
-  document.getElementById("healthyCount").innerText=healthy;
-  document.getElementById("lowCount").innerText=low;
-  document.getElementById("criticalCount").innerText=critical;
+  document.getElementById("healthyCount").innerText = healthy;
+  document.getElementById("lowCount").innerText = low;
+  document.getElementById("criticalCount").innerText = critical;
 
-  populateFilters(stations,trains);
+  populateFilters(stations, trains);
 }
 
 
 // ---------------- FILTER ----------------
-function applyFilter(){
+function applyFilter() {
 
-  const st=document.getElementById("filterStation").value;
-  const tr=document.getElementById("filterTrain").value;
+  const st = document.getElementById("filterStation").value;
+  const tr = document.getElementById("filterTrain").value;
 
-  let query="?";
-  if(st) query+=`station=${st}&`;
-  if(tr) query+=`train=${tr}`;
+  let query = "?";
+  if (st) query += `station=${st}&`;
+  if (tr) query += `train=${tr}`;
 
-  currentFilter=query;
+  currentFilter = query;
   loadData(query);
 }
 
-function clearFilter(){
-  currentFilter="";
+function clearFilter() {
+  currentFilter = "";
   loadData();
 }
 
 
 // ---------------- DROPDOWNS ----------------
-function populateFilters(stations,trains){
+function populateFilters(stations, trains) {
 
-  const s=document.getElementById("filterStation");
-  const t=document.getElementById("filterTrain");
+  const s = document.getElementById("filterStation");
+  const t = document.getElementById("filterTrain");
 
-  if(s.options.length===1){
-    stations.forEach(v=>s.innerHTML+=`<option value="${v}">${v}</option>`);
+  if (s.options.length === 1) {
+    stations.forEach(v => s.innerHTML += `<option value="${v}">${v}</option>`);
   }
 
-  if(t.options.length===1){
-    trains.forEach(v=>t.innerHTML+=`<option value="${v}">${v}</option>`);
+  if (t.options.length === 1) {
+    trains.forEach(v => t.innerHTML += `<option value="${v}">${v}</option>`);
   }
 }
 
 
 // ---------------- ADMIN ----------------
-function loadUsersIfAdmin(){
-  if(role==="admin"||role==="superadmin"||role==="super_admin"){
-    document.getElementById("adminPanel").style.display="block";
+function loadUsersIfAdmin() {
+  if (role === "admin" || role === "superadmin" || role === "super_admin") {
+    document.getElementById("adminPanel").style.display = "block";
     loadUsers();
   }
 }
 
-async function loadUsers(){
+async function loadUsers() {
 
-  const res=await fetch(`${BASE}/users`,{
-    headers:{Authorization:"Bearer "+token}
+  const res = await fetch(`${BASE}/users`, {
+    headers: { Authorization: "Bearer " + token }
   });
 
-  const users=await res.json();
-  const table=document.getElementById("usersTable");
-  table.innerHTML="";
+  const users = await res.json();
+  const table = document.getElementById("usersTable");
+  table.innerHTML = "";
 
-  users.forEach(u=>{
-    table.innerHTML+=`
+  users.forEach(u => {
+    table.innerHTML += `
       <tr>
         <td>${u.name}</td>
         <td>${u.email}</td>
         <td>${u.role}</td>
-        <td>${u.station_access||"-"}</td>
+        <td>${u.station_access || "-"}</td>
       </tr>`;
   });
 }
 
+/* ---------------- UPDATE USER ---------------- */
+async function updateUser() {
+
+  const id = document.getElementById("edit_id").value;
+  const role = document.getElementById("edit_role").value;
+  const station = document.getElementById("edit_station").value;
+
+  const res = await fetch(`${BASE}/users/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ role, station_access: station })
+  });
+
+  alert((await res.json()).message);
+  loadUsers();
+}
+
+/* ---------------- UPDATE TRAIN ---------------- */
+async function updateTrain() {
+
+  const no = document.getElementById("edit_train_no").value;
+  const name = document.getElementById("edit_train_name").value;
+
+  const res = await fetch(`${BASE}/master/train/${no}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ train_name: name })
+  });
+
+  alert((await res.json()).message);
+}
+
+/* ---------------- UPDATE STATION ---------------- */
+async function updateStation() {
+
+  const no = document.getElementById("edit_station_no").value;
+  const name = document.getElementById("edit_station_name").value;
+
+  const res = await fetch(`${BASE}/master/station/${no}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ station_name: name })
+  });
+
+  alert((await res.json()).message);
+}
 
 // ---------------- LOGOUT ----------------
-function logout(){
+function logout() {
   localStorage.clear();
-  window.location.href="login.html";
+  window.location.href = "login.html";
 }
