@@ -12,20 +12,23 @@ if (!token) {
 // ---------------- START APP AFTER PAGE LOAD ----------------
 document.addEventListener("DOMContentLoaded", () => {
 
-  console.log("Logged in as:", role);
+  console.log("Dashboard Loaded");
 
-  // show admin panel
-  if (role === "admin" || role === "superadmin" || role === "super_admin") {
-    const panel = document.getElementById("adminPanel");
-    if (panel) {
-      panel.style.display = "block";
-      loadUsers();
-    }
-  }
-
-  // START LIVE DATA (THIS WAS MISSING)
+  // ALWAYS load water data
   loadData();
-  setInterval(loadData, 3000);
+  setInterval(loadData, 5000); // live updates every 5 sec
+
+  // ROLE UI
+  const role = (localStorage.getItem("role") || "").toLowerCase();
+  console.log("Logged in as role:", role);
+
+  if (role === "admin" || role === "superadmin" || role === "super_admin") {
+      const panel = document.getElementById("adminPanel");
+      if(panel){
+        panel.style.display = "block";
+        loadUsers();
+      }
+  }
 });
 
 
