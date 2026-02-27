@@ -141,6 +141,66 @@ async function loadUsers() {
   });
 }
 
+/* ---------------- CREATE USER ---------------- */
+async function createUser() {
+
+  const name = document.getElementById("u_name").value;
+  const email = document.getElementById("u_email").value;
+  const password = document.getElementById("u_pass").value;
+  const role = document.getElementById("u_role").value;
+  const station = document.getElementById("u_station").value;
+
+  const res = await fetch(`${BASE}/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ name, email, password, role, station_access: station })
+  });
+
+  alert((await res.json()).message);
+  loadUsers();
+}
+
+
+/* ---------------- ADD TRAIN ---------------- */
+async function addTrain() {
+
+  const train_number = document.getElementById("train_no").value;
+  const train_name = document.getElementById("train_name").value;
+
+  const res = await fetch(`${BASE}/master/train`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ train_number, train_name })
+  });
+
+  alert((await res.json()).message);
+}
+
+
+/* ---------------- ADD STATION ---------------- */
+async function addStation() {
+
+  const station_number = document.getElementById("station_no").value;
+  const station_name = document.getElementById("station_name").value;
+
+  const res = await fetch(`${BASE}/master/station`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ station_number, station_name })
+  });
+
+  alert((await res.json()).message);
+}
+
 /* ---------------- UPDATE USER ---------------- */
 async function updateUser() {
 
@@ -151,7 +211,7 @@ async function updateUser() {
 
   if (!email) return alert("Email required");
 
-  const res = await fetch(`${BASE}/users/update-by-email`, {
+  const res = await fetch(`${BASE}/users/by-email`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
