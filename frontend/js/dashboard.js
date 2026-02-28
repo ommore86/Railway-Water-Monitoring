@@ -2,6 +2,7 @@ const BASE = "https://railway-water-backend.onrender.com/api";
 let currentFilter = "";
 let firstLoad = true;
 let refreshTimer = null;
+let openTrains = new Set();
 
 // session
 const token = localStorage.getItem("token");
@@ -121,7 +122,9 @@ async function loadData(query = "") {
     });
     const rawData = await res.json();
     const tableBody = document.getElementById("dataTable");
-    tableBody.innerHTML = "";
+    
+    // Save current scroll position
+    const scrollPos = tableBody.parentElement.scrollTop;
 
     // 1. Group Data by Train Number
     const trains = {};
@@ -140,24 +143,28 @@ async function loadData(query = "") {
       }
 
       let status = "Healthy";
-      if (row.water_level < 25) {
+      if (row.water_level < 25) { 
         status = "Critical"; trains[tNum].c++; totalCritical++;
-      } else if (row.water_level < 50) {
+      } else if (row.water_level < 50) { 
         status = "Low"; trains[tNum].l++; totalLow++;
-      } else {
+      } else { 
         status = "Healthy"; trains[tNum].h++; totalHealthy++;
       }
 
       trains[tNum].coaches.push({ no: row.coach_number, lv: row.water_level, st: status });
     });
 
-    // 2. Render Rows
+    // 2. Clear and Render
+    tableBody.innerHTML = "";
+
     Object.keys(trains).forEach(tNum => {
       const t = trains[tNum];
       const detailId = `details-${tNum}`;
+      // Check if this train was open before the refresh
+      const isExpanded = openTrains.has(detailId);
 
       tableBody.innerHTML += `
-        <tr class="train-row" onclick="toggleTrainDetails('${detailId}', this)">
+        <tr class="train-row ${isExpanded ? 'expanded' : ''}" onclick="toggleTrainDetails('${detailId}', this)">
           <td><i class="fas fa-chevron-down expand-icon"></i></td>
           <td><b>${t.station}</b></td>
           <td>${t.name} <small>(${tNum})</small></td>
@@ -169,7 +176,7 @@ async function loadData(query = "") {
           </td>
           <td>${new Date(t.time).toLocaleTimeString()}</td>
         </tr>
-        <tr id="${detailId}" class="coach-details-row hidden">
+        <tr id="${detailId}" class="coach-details-row ${isExpanded ? '' : 'hidden'}">
           <td colspan="6">
             <div class="coach-grid">
               ${t.coaches.map(c => `
@@ -186,11 +193,36 @@ async function loadData(query = "") {
         </tr>`;
     });
 
+    // Restore scroll position
+    tableBody.parentElement.scrollTop = scrollPos;
+
     document.getElementById("healthyCount").innerText = totalHealthy;
     document.getElementById("lowCount").innerText = totalLow;
     document.getElementById("criticalCount").innerText = totalCritical;
+    
+    // Update dropdown filters if it's the first time
+    if(firstLoad && rawData.length > 0) {
+        populateFilters([...new Set(rawData.map(r => r.station_number))], [...new Set(rawData.map(r => r.train_number))]);
+    }
+
   } catch (err) {
     console.error("Fetch error:", err);
+  }
+}
+
+// Updated Toggle function to "Remember" the state
+function toggleTrainDetails(id, rowEl) {
+  const detailsRow = document.getElementById(id);
+  const isHidden = detailsRow.classList.contains('hidden');
+  
+  if (isHidden) {
+    detailsRow.classList.remove('hidden');
+    rowEl.classList.add('expanded');
+    openTrains.add(id); // Save to memory
+  } else {
+    detailsRow.classList.add('hidden');
+    rowEl.classList.remove('expanded');
+    openTrains.delete(id); // Remove from memory
   }
 }
 
@@ -215,7 +247,10 @@ function applyFilter() {
   let query = "?";
   if (st) query += `station=${st}&`;
   if (tr) query += `train=${tr}`;
+  
   currentFilter = query;
+  // Clear the memory when applying a new filter to avoid ghost rows
+  openTrains.clear(); 
   loadData(query);
 }
 
