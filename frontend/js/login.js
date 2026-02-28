@@ -1,5 +1,13 @@
 const API = "https://railway-water-backend.onrender.com/api";
 
+let forgotModal, resetModal;
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Initialize Bootstrap modals so we can control them via JS
+    forgotModal = new bootstrap.Modal(document.getElementById("forgotModal"));
+    resetModal = new bootstrap.Modal(document.getElementById("resetModal"));
+});
+
 async function login() {
 
   const email = emailInput("email");
@@ -31,37 +39,64 @@ function emailInput(id){
 
 /* ---------------- FORGOT ---------------- */
 
-function openForgot(){
-  new bootstrap.Modal(document.getElementById("forgotModal")).show();
+function openForgot() {
+    forgotModal.show();
 }
 
-async function sendReset(){
+async function sendReset() {
+    const email = document.getElementById("fp_email").value.trim();
+    if (!email) return alert("Please enter your email");
 
-  const email=emailInput("fp_email");
+    try {
+        const res = await fetch(`${API}/auth/forgot-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
 
-  const res=await fetch(`${API}/auth/forgot-password`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({email})
-  });
+        const data = await res.json();
 
-  const data=await res.json();
-  alert("Token:\n"+data.reset_token+"\n(temporary display)");
-
-  new bootstrap.Modal(document.getElementById("resetModal")).show();
+        if (res.ok) {
+            alert("SUCCESS!\nYour Reset Token is: " + data.reset_token + "\n\n(In a real app, this would be emailed to you)");
+            
+            // Auto-fill the token into the next modal
+            document.getElementById("rp_token").value = data.reset_token;
+            
+            // Switch Modals
+            forgotModal.hide();
+            resetModal.show();
+        } else {
+            alert(data.message);
+        }
+    } catch (err) {
+        alert("Server error. Please try again later.");
+    }
 }
 
-async function resetPassword(){
+async function resetPassword() {
+    const token = document.getElementById("rp_token").value.trim();
+    const newPassword = document.getElementById("rp_password").value.trim();
 
-  const token=emailInput("rp_token");
-  const newPassword=emailInput("rp_password");
+    if (!token || !newPassword) return alert("Please fill all fields");
+    if (newPassword.length < 6) return alert("Password must be at least 6 characters");
 
-  const res=await fetch(`${API}/auth/reset-password`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({token,newPassword})
-  });
+    try {
+        const res = await fetch(`${API}/auth/reset-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, newPassword })
+        });
 
-  const data=await res.json();
-  alert(data.message);
+        const data = await res.json();
+        alert(data.message);
+
+        if (res.ok) {
+            resetModal.hide();
+            // Clear inputs
+            document.getElementById("rp_token").value = "";
+            document.getElementById("rp_password").value = "";
+        }
+    } catch (err) {
+        alert("Error resetting password.");
+    }
 }

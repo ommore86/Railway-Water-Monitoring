@@ -75,24 +75,27 @@ exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     const [rows] = await db.query("SELECT id FROM users WHERE email=?", [email]);
-    if (!rows.length)
-      return res.json({ message: "If account exists, reset link generated" });
+    
+    // Security tip: Don't reveal if an email doesn't exist. 
+    // But for your internal tool, we'll be direct.
+    if (!rows.length) return res.status(404).json({ message: "Email not found" });
 
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiry = new Date(Date.now() + 1000 * 60 * 15); // 15 min
+    const token = crypto.randomBytes(4).toString("hex").toUpperCase(); // Short 8-char hex code for easier typing
+    const expiry = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes from now
 
     await db.query(
       "UPDATE users SET reset_token=?, reset_expiry=? WHERE email=?",
       [token, expiry, email]
     );
 
-    // Later you connect nodemailer
+    // Since no Nodemailer is set up, we send the token in the response so you can copy-paste it.
     res.json({
-      message: "Reset token generated",
-      reset_token: token
+      message: "Reset token generated successfully",
+      reset_token: token 
     });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Error generating reset token" });
   }
 };
@@ -103,6 +106,7 @@ exports.resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 
+    // Check if token matches and is not expired
     const [rows] = await db.query(
       "SELECT id FROM users WHERE reset_token=? AND reset_expiry > NOW()",
       [token]
@@ -113,14 +117,16 @@ exports.resetPassword = async (req, res) => {
 
     const hashed = await bcrypt.hash(newPassword, 10);
 
+    // Update password and CLEAR the token so it can't be used again
     await db.query(
       "UPDATE users SET password=?, reset_token=NULL, reset_expiry=NULL WHERE id=?",
       [hashed, rows[0].id]
     );
 
-    res.json({ message: "Password updated successfully" });
+    res.json({ message: "Password updated successfully! You can now login." });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Reset failed" });
   }
 };

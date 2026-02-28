@@ -40,25 +40,55 @@
 </div>
 
 
-<!-- FORGOT PASSWORD -->
-<div class="modal fade" id="forgotModal">
-  <div class="modal-dialog">
-    <div class="modal-content p-4">
-      <h4>Forgot Password</h4>
-      <input id="fp_email" class="form-control mb-3" placeholder="Enter Email">
-      <button class="btn btn-warning w-100" onclick="sendReset()">Generate Reset Token</button>
+<div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 shadow-lg border-0">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="m-0 text-primary">Forgot Password</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <p class="text-muted small mb-4">Enter your registered email address. We will generate a secure reset token for you.</p>
+      
+      <div class="mb-3">
+        <label class="form-label small fw-bold text-secondary">Email Address</label>
+        <input id="fp_email" type="email" class="form-control form-control-lg" placeholder="name@railway.com">
+      </div>
+      
+      <button class="btn btn-warning btn-lg w-100 fw-bold mb-3" onclick="sendReset()">
+        Generate Reset Token
+      </button>
+      
+      <div class="text-center">
+        <a href="#" class="text-decoration-none small text-secondary" data-bs-dismiss="modal">Back to Login</a>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- RESET PASSWORD -->
-<div class="modal fade" id="resetModal">
-  <div class="modal-dialog">
-    <div class="modal-content p-4">
-      <h4>Reset Password</h4>
-      <input id="rp_token" class="form-control mb-2" placeholder="Paste Token">
-      <input id="rp_password" type="password" class="form-control mb-3" placeholder="New Password">
-      <button class="btn btn-success w-100" onclick="resetPassword()">Reset Password</button>
+<div class="modal fade" id="resetModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 shadow-lg border-0">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="m-0 text-success">Set New Password</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <p class="text-muted small mb-4">Please enter the verification token shown in the previous step and choose a strong new password.</p>
+
+      <div class="mb-3">
+        <label class="form-label small fw-bold text-secondary">Verification Token</label>
+        <input id="rp_token" class="form-control" placeholder="Paste Token Here" style="letter-spacing: 2px; font-weight: bold; background-color: #f8f9fa;">
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small fw-bold text-secondary">New Password</label>
+        <input id="rp_password" type="password" class="form-control form-control-lg" placeholder="Minimum 6 characters">
+      </div>
+
+      <button class="btn btn-success btn-lg w-100 fw-bold" onclick="resetPassword()">
+        Update Password
+      </button>
     </div>
   </div>
 </div>
