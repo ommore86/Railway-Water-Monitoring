@@ -385,30 +385,36 @@
     }
 
     .status-badge {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
+      animation: none !important;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
       font-weight: bold;
-      text-transform: uppercase;
     }
 
     .status-good {
-      background: rgba(76, 201, 240, 0.1);
-      color: var(--success);
+      background: #d4edda;
+      color: #155724;
     }
 
     .status-low {
-      background: rgba(247, 37, 133, 0.1);
-      color: var(--warning);
+      background: #fff3cd;
+      color: #856404;
     }
 
-    /* --- BLINKING RED STATUS --- */
     .status-critical {
-      background: rgba(239, 35, 60, 0.2) !important;
-      color: var(--danger) !important;
-      border: 1px solid var(--danger);
-      animation: blink-red 0.8s infinite;
-      font-weight: bold;
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .blink {
+      animation: blinker 1.5s linear infinite;
+    }
+
+    @keyframes blinker {
+      50% {
+        opacity: 0.3;
+      }
     }
 
     @keyframes pulse {
@@ -494,18 +500,44 @@
 
     .coach-card {
       background: white;
-      padding: 10px 5px;
-      border-radius: 4px;
-      /* Slightly squared like a coach */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      border: 2px solid #ccc;
-      border-bottom: 5px solid #555;
-      /* The "wheels/base" area */
-      min-height: 80px;
-      justify-content: center;
+      padding: 12px 8px;
+      /* Increased padding */
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      border-bottom: 5px solid #444;
+      /* Coach base */
+      text-align: center;
+      min-height: 100px;
+      /* Make boxes slightly taller */
+    }
+
+    .coach-card b,
+    .coach-card .water-pct {
+      font-size: 1.3rem !important;
+      /* Larger percentage */
+      display: block;
+      margin: 4px 0;
+    }
+
+    .blink-danger {
+      animation: critical-glow 1.2s infinite;
+    }
+
+    @keyframes critical-glow {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.05);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
     .coach-card::after {
@@ -531,7 +563,7 @@
     }
 
     .card-critical {
-      border-top: 6px solid var(--danger);
+      border-top: 5px solid #dc3545;
     }
 
     @keyframes card-blink {

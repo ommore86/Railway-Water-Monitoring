@@ -83,14 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
   showPage("dashboard");
 
   // Auto-refresh for Dashboard Data
-if (refreshTimer) clearInterval(refreshTimer);
-refreshTimer = setInterval(() => {
-  // Check if dashboardPage is NOT hidden
-  const isDashboardVisible = !document.getElementById("dashboardPage").classList.contains("hidden");
-  if (isDashboardVisible) {
-    loadData(currentFilter);
-  }
-}, 5000);
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => {
+    // Check if dashboardPage is NOT hidden
+    const isDashboardVisible = !document.getElementById("dashboardPage").classList.contains("hidden");
+    if (isDashboardVisible) {
+      loadData(currentFilter);
+    }
+  }, 5000);
 });
 
 // ---------------- ADMIN DETECTION ----------------
@@ -141,11 +141,11 @@ async function loadData(query = "") {
       }
 
       let status = "Healthy";
-      if (row.water_level < 25) { 
+      if (row.water_level < 25) {
         status = "Critical"; trains[tNum].c++; totalCritical++;
-      } else if (row.water_level < 50) { 
+      } else if (row.water_level < 50) {
         status = "Low"; trains[tNum].l++; totalLow++;
-      } else { 
+      } else {
         status = "Healthy"; trains[tNum].h++; totalHealthy++;
       }
       trains[tNum].coaches.push({ no: row.coach_number, lv: row.water_level, st: status });
@@ -176,16 +176,26 @@ async function loadData(query = "") {
         <tr id="${detailId}" class="coach-details-row ${isExpanded ? '' : 'hidden'}">
           <td colspan="6">
             <div class="coach-grid">
-              ${t.coaches.map(c => `
-                <div class="coach-card card-${c.st.toLowerCase()}">
-                  <small style="font-size: 10px; color: #666; font-weight: bold;">${c.no}</small>
-                  <div style="font-weight: 800; font-size: 1.1rem; color: #222; margin: 2px 0;">${c.lv}%</div>
-                  <div style="width: 15px; height: 4px; background: #888; border-radius: 2px; opacity: 0.5;"></div>
-                  <span class="status-badge status-${c.st.toLowerCase()}" style="font-size:8px; padding: 2px 5px; margin-top: 3px;">
-                    ${c.st}
-                  </span>
-                </div>
-              `).join('')}
+              ${t.coaches.map(c => {
+                // Determine if the inner tag should blink
+                const isCritical = c.st === 'Critical';
+                const blinkClass = isCritical ? 'blink-danger' : '';
+
+                return `
+                  <div class="coach-card card-${c.st.toLowerCase()}">
+                    <small style="font-size: 12px; color: #555; font-weight: bold;">${c.no}</small>
+                    
+                    <div class="water-pct" style="font-weight: 800; color: #222;">
+                      ${c.lv}%
+                    </div>
+                    
+                    <span class="status-badge status-${c.st.toLowerCase()} ${blinkClass}" 
+                        style="font-size: 10px; padding: 3px 8px; margin-top: 8px;">
+                      ${c.st.toUpperCase()}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </td>
         </tr>`;
@@ -193,7 +203,7 @@ async function loadData(query = "") {
 
     // 3. Update the Table
     if (tableBody.innerHTML !== newHTML) {
-        tableBody.innerHTML = newHTML;
+      tableBody.innerHTML = newHTML;
     }
 
     // 4. Update the LIVE TIMESTAMP (The part you requested)
@@ -201,16 +211,16 @@ async function loadData(query = "") {
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const refreshEl = document.getElementById("refreshStatus");
     if (refreshEl) {
-        refreshEl.innerText = `Live: Last updated at ${timeStr}`;
+      refreshEl.innerText = `Live: Last updated at ${timeStr}`;
     }
 
     // Update Top Cards
     document.getElementById("healthyCount").innerText = totalHealthy;
     document.getElementById("lowCount").innerText = totalLow;
     document.getElementById("criticalCount").innerText = totalCritical;
-    
-    if(firstLoad && rawData.length > 0) {
-        populateFilters([...new Set(rawData.map(r => r.station_number))], [...new Set(rawData.map(r => r.train_number))]);
+
+    if (firstLoad && rawData.length > 0) {
+      populateFilters([...new Set(rawData.map(r => r.station_number))], [...new Set(rawData.map(r => r.train_number))]);
     }
 
   } catch (err) {
@@ -222,7 +232,7 @@ async function loadData(query = "") {
 
 function toggleTrainDetails(id, rowEl) {
   const detailsRow = document.getElementById(id);
-  
+
   if (detailsRow.classList.contains('hidden')) {
     detailsRow.classList.remove('hidden');
     rowEl.classList.add('expanded');
@@ -241,7 +251,7 @@ function applyFilter() {
   let query = "?";
   if (st) query += `station=${st}&`;
   if (tr) query += `train=${tr}`;
-  
+
   currentFilter = query;
   openTrains.clear(); // Clear memory so new filtered results start fresh
   loadData(query);
