@@ -8,25 +8,42 @@ const token = localStorage.getItem("token");
 const role = (localStorage.getItem("role") || "").toLowerCase();
 const name = localStorage.getItem("name");
 
+// ---------- PAGE NAVIGATION ----------
+function showPage(page) {
+
+  document.getElementById("dashboardPage").style.display = "none";
+  document.getElementById("usersPage").style.display = "none";
+  document.getElementById("masterPage").style.display = "none";
+
+  if (page === "dashboard") document.getElementById("dashboardPage").style.display = "block";
+  if (page === "users") document.getElementById("usersPage").style.display = "block";
+  if (page === "master") document.getElementById("masterPage").style.display = "block";
+}
+
 if (!token) window.location.href = "login.html";
 
 document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("loginInfo").innerText =
-    `👤 ${name} (${role}) - ${localStorage.getItem("email")}`;
+    `👤 ${name} (${role})`;
 
-  // initial load
+  // default page
+  showPage("dashboard");
+
+  // role based buttons
+  if (role === "user") {
+    document.getElementById("usersBtn").style.display = "none";
+    document.getElementById("masterBtn").style.display = "none";
+  }
+
   loadData();
   loadUsersIfAdmin();
 
-  // prevent multiple timers (important)
   if (refreshTimer) clearInterval(refreshTimer);
 
-  // auto refresh every 5 seconds using SAME FILTER
   refreshTimer = setInterval(() => {
     loadData(currentFilter);
   }, 5000);
-
 });
 
 
