@@ -124,6 +124,8 @@
       top: 0;
       z-index: 2;
     }
+    
+    .mt-4 { margin-top: 20px; }
   </style>
 </head>
 
@@ -134,8 +136,8 @@
 
     <div style="display:flex;align-items:center;gap:15px">
       <button onclick="showPage('dashboard')">Dashboard</button>
-      <button onclick="showPage('users')" id="usersBtn">Users</button>
-      <button onclick="showPage('master')" id="masterBtn">Master Data</button>
+      <button onclick="showPage('users')" id="usersBtn" style="display:none;">Users</button>
+      <button onclick="showPage('master')" id="masterBtn" style="display:none;">Master Data</button>
 
       <span id="loginInfo"></span>
       <button onclick="logout()">Logout</button>
@@ -143,7 +145,6 @@
   </header>
 
   <section id="dashboardPage">
-    <!-- ===== STATS ===== -->
     <section class="cards">
       <div class="card good">
         <h3>Healthy Coaches</h3>
@@ -161,24 +162,17 @@
       </div>
     </section>
 
-
-    <!-- ===== WATER DATA ===== -->
     <section class="table-section">
       <h2>Live Coach Water Status</h2>
-
       <div style="margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap">
-
         <select id="filterStation">
           <option value="">All Stations</option>
         </select>
-
         <select id="filterTrain">
           <option value="">All Trains</option>
         </select>
-
         <button onclick="applyFilter()">Apply Filter</button>
         <button onclick="clearFilter()">Clear</button>
-
       </div>
 
       <div class="table-container">
@@ -199,55 +193,35 @@
     </section>
   </section>
 
-
-  <!-- ===== ADMIN PANEL (SEPARATE PAGE SECTION) ===== -->
   <section id="usersPage" style="display:none;padding:30px">
     <h2>👨‍💼 User Management</h2>
-
-    <div style="
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    margin-bottom:20px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
-  ">
-
+    <div style="background:white; padding:15px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.08);">
       <h3>Create User</h3>
-
       <div style="display:flex;flex-wrap:wrap;gap:10px">
-
         <input id="u_name" placeholder="Name">
         <input id="u_email" placeholder="Email">
         <input id="u_pass" placeholder="Password">
-
         <select id="u_role">
           <option value="user">User</option>
           <option value="admin">Admin</option>
         </select>
-
         <input id="u_station" placeholder="Station Code (ST01)">
         <button onclick="createUser()">Create</button>
-
       </div>
 
       <h3 class="mt-4">Update Existing User</h3>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-
         <input id="edit_email" placeholder="User Email">
         <input id="edit_name" placeholder="New Name">
-
         <select id="edit_role">
           <option value="">Keep Role Same</option>
           <option value="user">User</option>
           <option value="admin">Admin</option>
         </select>
-
         <input id="edit_station" placeholder="New Station (optional)">
         <button onclick="updateUser()">Update User</button>
-
       </div>
     </div>
-
 
     <h3>All Users</h3>
     <table>
@@ -261,40 +235,37 @@
       </thead>
       <tbody id="usersTable"></tbody>
     </table>
-
-    <h2>Master Data</h2>
-    <section id="masterPage" style="display:none;padding:30px">
-      <div style="display:flex;gap:40px;margin-top:20px">
-
-        <!-- LEFT SIDE : TRAIN -->
-        <div style="flex:1;background:white;padding:15px;border-radius:10px">
-          <h3>Add Train</h3>
-          <input id="train_no" placeholder="Train Number">
-          <input id="train_name" placeholder="Train Name">
-          <button onclick="addTrain()">Add Train</button>
-
-          <h3 style="margin-top:20px">Update Train</h3>
-          <input id="edit_train_no" placeholder="Train Number">
-          <input id="edit_train_name" placeholder="New Name">
-          <button onclick="updateTrain()">Update Train</button>
-        </div>
-
-        <!-- RIGHT SIDE : STATION -->
-        <div style="flex:1;background:white;padding:15px;border-radius:10px">
-          <h3>Add Station</h3>
-          <input id="station_no" placeholder="Station Number">
-          <input id="station_name" placeholder="Station Name">
-          <button onclick="addStation()">Add Station</button>
-
-          <h3 style="margin-top:20px">Update Station</h3>
-          <input id="edit_station_no" placeholder="Station Number">
-          <input id="edit_station_name" placeholder="New Name">
-          <button onclick="updateStation()">Update Station</button>
-        </div>
-      </div>
-
-    </section>
   </section>
 
-  <script src="js/dashboard.js?v=2"></script>
+  <section id="masterPage" style="display:none;padding:30px">
+    <h2>⚙️ Master Data Management</h2>
+    <div style="display:flex;gap:40px;margin-top:20px">
+      <div style="flex:1;background:white;padding:15px;border-radius:10px">
+        <h3>Add Train</h3>
+        <input id="train_no" placeholder="Train Number">
+        <input id="train_name" placeholder="Train Name">
+        <button onclick="addTrain()">Add Train</button>
+
+        <h3 style="margin-top:20px">Update Train</h3>
+        <input id="edit_train_no" placeholder="Train Number">
+        <input id="edit_train_name" placeholder="New Name">
+        <button onclick="updateTrain()">Update Train</button>
+      </div>
+
+      <div style="flex:1;background:white;padding:15px;border-radius:10px">
+        <h3>Add Station</h3>
+        <input id="station_no" placeholder="Station Number">
+        <input id="station_name" placeholder="Station Name">
+        <button onclick="addStation()">Add Station</button>
+
+        <h3 style="margin-top:20px">Update Station</h3>
+        <input id="edit_station_no" placeholder="Station Number">
+        <input id="edit_station_name" placeholder="New Name">
+        <button onclick="updateStation()">Update Station</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/dashboard.js?v=3"></script>
 </body>
+</html>
