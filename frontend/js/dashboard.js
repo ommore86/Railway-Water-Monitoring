@@ -157,6 +157,7 @@ async function loadData(query = "") {
     Object.keys(trains).forEach(tNum => {
       const t = trains[tNum];
       const detailId = `details-${tNum}`;
+      // Check memory: if train was open, keep it open in the new HTML
       const isExpanded = openTrains.has(detailId);
 
       newHTML += `
@@ -189,10 +190,17 @@ async function loadData(query = "") {
         </tr>`;
     });
 
-    // 3. CRITICAL FIX: Only update the innerHTML if it has actually changed
-    // This prevents the browser from re-rendering (and closing dropdowns) if the data is same
+    // 3. Update the Table
     if (tableBody.innerHTML !== newHTML) {
         tableBody.innerHTML = newHTML;
+    }
+
+    // 4. Update the LIVE TIMESTAMP (The part you requested)
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const refreshEl = document.getElementById("refreshStatus");
+    if (refreshEl) {
+        refreshEl.innerText = `Live: Last updated at ${timeStr}`;
     }
 
     // Update Top Cards
@@ -206,6 +214,8 @@ async function loadData(query = "") {
 
   } catch (err) {
     console.error("Fetch error:", err);
+    const refreshEl = document.getElementById("refreshStatus");
+    if (refreshEl) refreshEl.innerText = "Live: Connection error...";
   }
 }
 
