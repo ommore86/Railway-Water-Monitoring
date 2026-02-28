@@ -132,6 +132,26 @@
       }
     }
 
+    @keyframes pulse-red {
+      0% {
+        background-color: #f8d7da;
+        color: #721c24;
+        transform: scale(1);
+      }
+
+      50% {
+        background-color: #dc3545;
+        color: white;
+        transform: scale(1.05);
+      }
+
+      100% {
+        background-color: #f8d7da;
+        color: #721c24;
+        transform: scale(1);
+      }
+    }
+
     .live-indicator {
       display: inline-flex;
       /* Changed from flex to inline-flex to shrink-to-fit */
@@ -411,6 +431,13 @@
       animation: blinker 1.5s linear infinite;
     }
 
+    .inner-blink {
+      /* This 'all' and '!important' ensures it overrides the static badge rules */
+      animation: pulse-red 1.2s infinite !important;
+      box-shadow: 0 0 10px rgba(220, 53, 69, 0.4);
+      border: 1px solid #dc3545;
+    }
+
     @keyframes blinker {
       50% {
         opacity: 0.3;
@@ -465,6 +492,11 @@
       display: none !important;
     }
 
+    .train-row .status-badge {
+      animation: none !important;
+      transform: none !important;
+    }
+
     .train-row {
       cursor: pointer;
     }
@@ -513,10 +545,10 @@
 
     .coach-card b,
     .coach-card .water-pct {
-      font-size: 1.3rem !important;
-      /* Larger percentage */
-      display: block;
-      margin: 4px 0;
+      font-size: 1.4rem !important;
+      font-weight: 800;
+      margin: 5px 0;
+      color: #1a1a1a;
     }
 
     .blink-danger {

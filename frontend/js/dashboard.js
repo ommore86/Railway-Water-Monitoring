@@ -177,21 +177,22 @@ async function loadData(query = "") {
           <td colspan="6">
             <div class="coach-grid">
               ${t.coaches.map(c => {
-                // Determine if the inner tag should blink
-                const isCritical = c.st === 'Critical';
-                const blinkClass = isCritical ? 'blink-danger' : '';
-
+                // Only apply the 'inner-blink' to the badge if status is Critical
+                const blinkClass = (c.st === 'Critical') ? 'inner-blink' : '';
+                
                 return `
                   <div class="coach-card card-${c.st.toLowerCase()}">
-                    <small style="font-size: 12px; color: #555; font-weight: bold;">${c.no}</small>
+                    <small style="font-size: 11px; color: #666; font-weight: bold; text-transform: uppercase;">
+                      Coach ${c.no}
+                    </small>
                     
-                    <div class="water-pct" style="font-weight: 800; color: #222;">
+                    <div class="water-pct">
                       ${c.lv}%
                     </div>
                     
                     <span class="status-badge status-${c.st.toLowerCase()} ${blinkClass}" 
-                        style="font-size: 10px; padding: 3px 8px; margin-top: 8px;">
-                      ${c.st.toUpperCase()}
+                          style="font-size: 11px; padding: 4px 10px; margin-top: 10px; min-width: 80px;">
+                      ${c.st}
                     </span>
                   </div>
                 `;
