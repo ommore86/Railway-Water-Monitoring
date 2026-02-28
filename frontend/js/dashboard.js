@@ -122,9 +122,6 @@ async function loadData(query = "") {
     });
     const rawData = await res.json();
     const tableBody = document.getElementById("dataTable");
-    
-    // Save current scroll position
-    const scrollPos = tableBody.parentElement.scrollTop;
 
     // 1. Group Data by Train Number
     const trains = {};
@@ -150,21 +147,19 @@ async function loadData(query = "") {
       } else { 
         status = "Healthy"; trains[tNum].h++; totalHealthy++;
       }
-
       trains[tNum].coaches.push({ no: row.coach_number, lv: row.water_level, st: status });
     });
 
-    // 2. Clear and Render
-    tableBody.innerHTML = "";
+    // 2. Build the new HTML string in a variable first
+    let newHTML = "";
 
     Object.keys(trains).forEach(tNum => {
       const t = trains[tNum];
       const detailId = `details-${tNum}`;
-      // Check if this train was open before the refresh
       const isExpanded = openTrains.has(detailId);
 
-      tableBody.innerHTML += `
-        <tr class="train-row ${isExpanded ? 'expanded' : ''}" onclick="toggleTrainDetails('${detailId}', this)">
+      newHTML += `
+        <tr class="train-row ${isExpanded ? 'expanded' : ''}" data-id="${detailId}" onclick="toggleTrainDetails('${detailId}', this)">
           <td><i class="fas fa-chevron-down expand-icon"></i></td>
           <td><b>${t.station}</b></td>
           <td>${t.name} <small>(${tNum})</small></td>
@@ -193,20 +188,38 @@ async function loadData(query = "") {
         </tr>`;
     });
 
-    // Restore scroll position
-    tableBody.parentElement.scrollTop = scrollPos;
+    // 3. CRITICAL FIX: Only update the innerHTML if it has actually changed
+    // This prevents the browser from re-rendering (and closing dropdowns) if the data is same
+    if (tableBody.innerHTML !== newHTML) {
+        tableBody.innerHTML = newHTML;
+    }
 
+    // Update Top Cards
     document.getElementById("healthyCount").innerText = totalHealthy;
     document.getElementById("lowCount").innerText = totalLow;
     document.getElementById("criticalCount").innerText = totalCritical;
     
-    // Update dropdown filters if it's the first time
     if(firstLoad && rawData.length > 0) {
         populateFilters([...new Set(rawData.map(r => r.station_number))], [...new Set(rawData.map(r => r.train_number))]);
     }
 
   } catch (err) {
     console.error("Fetch error:", err);
+  }
+}
+
+function toggleTrainDetails(id, rowEl) {
+  const detailsRow = document.getElementById(id);
+  
+  // Toggle the visible state immediately in the DOM
+  if (detailsRow.classList.contains('hidden')) {
+    detailsRow.classList.remove('hidden');
+    rowEl.classList.add('expanded');
+    openTrains.add(id); // Save to memory
+  } else {
+    detailsRow.classList.add('hidden');
+    rowEl.classList.remove('expanded');
+    openTrains.delete(id); // Remove from memory
   }
 }
 
