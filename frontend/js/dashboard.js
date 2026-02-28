@@ -83,13 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
   showPage("dashboard");
 
   // Auto-refresh for Dashboard Data
-  if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(() => {
-    // Only refresh if we are actually on the dashboard page
-    if (document.getElementById("dashboardPage").style.display !== "none") {
-      loadData(currentFilter);
-    }
-  }, 5000);
+if (refreshTimer) clearInterval(refreshTimer);
+refreshTimer = setInterval(() => {
+  // Check if dashboardPage is NOT hidden
+  const isDashboardVisible = !document.getElementById("dashboardPage").classList.contains("hidden");
+  if (isDashboardVisible) {
+    loadData(currentFilter);
+  }
+}, 5000);
 });
 
 // ---------------- ADMIN DETECTION ----------------
@@ -211,45 +212,14 @@ async function loadData(query = "") {
 function toggleTrainDetails(id, rowEl) {
   const detailsRow = document.getElementById(id);
   
-  // Toggle the visible state immediately in the DOM
   if (detailsRow.classList.contains('hidden')) {
     detailsRow.classList.remove('hidden');
     rowEl.classList.add('expanded');
-    openTrains.add(id); // Save to memory
+    openTrains.add(id); // This saves the state for the refresh
   } else {
     detailsRow.classList.add('hidden');
     rowEl.classList.remove('expanded');
-    openTrains.delete(id); // Remove from memory
-  }
-}
-
-// Updated Toggle function to "Remember" the state
-function toggleTrainDetails(id, rowEl) {
-  const detailsRow = document.getElementById(id);
-  const isHidden = detailsRow.classList.contains('hidden');
-  
-  if (isHidden) {
-    detailsRow.classList.remove('hidden');
-    rowEl.classList.add('expanded');
-    openTrains.add(id); // Save to memory
-  } else {
-    detailsRow.classList.add('hidden');
-    rowEl.classList.remove('expanded');
-    openTrains.delete(id); // Remove from memory
-  }
-}
-
-// Add this function at the bottom of your dashboard.js
-function toggleTrainDetails(id, rowEl) {
-  const detailsRow = document.getElementById(id);
-  const isHidden = detailsRow.classList.contains('hidden');
-
-  if (isHidden) {
-    detailsRow.classList.remove('hidden');
-    rowEl.classList.add('expanded');
-  } else {
-    detailsRow.classList.add('hidden');
-    rowEl.classList.remove('expanded');
+    openTrains.delete(id); // This removes it from memory
   }
 }
 
@@ -262,8 +232,7 @@ function applyFilter() {
   if (tr) query += `train=${tr}`;
   
   currentFilter = query;
-  // Clear the memory when applying a new filter to avoid ghost rows
-  openTrains.clear(); 
+  openTrains.clear(); // Clear memory so new filtered results start fresh
   loadData(query);
 }
 
