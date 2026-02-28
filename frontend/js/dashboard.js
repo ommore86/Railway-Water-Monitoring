@@ -178,9 +178,10 @@ async function loadData(query = "") {
             <div class="coach-grid">
               ${t.coaches.map(c => `
                 <div class="coach-card card-${c.st.toLowerCase()}">
-                  <small style="color:#888">${c.no}</small>
-                  <div style="font-weight:bold; font-size:1.2rem">${c.lv}%</div>
-                  <span class="status-badge status-${c.st === 'Critical' ? 'critical' : (c.st === 'Low' ? 'low' : 'good')}" style="font-size:9px">
+                  <small style="font-size: 10px; color: #666; font-weight: bold;">${c.no}</small>
+                  <div style="font-weight: 800; font-size: 1.1rem; color: #222; margin: 2px 0;">${c.lv}%</div>
+                  <div style="width: 15px; height: 4px; background: #888; border-radius: 2px; opacity: 0.5;"></div>
+                  <span class="status-badge status-${c.st.toLowerCase()}" style="font-size:8px; padding: 2px 5px; margin-top: 3px;">
                     ${c.st}
                   </span>
                 </div>
