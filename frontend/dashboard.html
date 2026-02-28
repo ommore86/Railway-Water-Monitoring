@@ -413,6 +413,67 @@
     .hidden {
       display: none !important;
     }
+
+    .train-row {
+      cursor: pointer;
+    }
+
+    .train-row:hover {
+      background: #f0f4ff !important;
+    }
+
+    .expand-icon {
+      transition: transform 0.3s;
+      color: var(--primary);
+    }
+
+    .expanded .expand-icon {
+      transform: rotate(180deg);
+    }
+
+    .coach-details-row {
+      background: #f9f9f9 !important;
+    }
+
+    .coach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 20px;
+      background: #eff2f7;
+      border-radius: 12px;
+      margin: 10px;
+    }
+
+    .coach-card {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border-top: 4px solid #ddd;
+    }
+
+    .card-healthy {
+      border-top-color: var(--success);
+    }
+
+    .card-low {
+      border-top-color: var(--warning);
+    }
+
+    .card-critical {
+      border-top-color: var(--danger);
+      animation: card-blink 1s infinite;
+    }
+
+    @keyframes card-blink {
+      50% {
+        border-top-color: transparent;
+      }
+    }
   </style>
 </head>
 
@@ -506,11 +567,11 @@
               <table>
                 <thead>
                   <tr>
+                    <th style="width: 40px;"></th>
                     <th>Station</th>
-                    <th>Train</th>
-                    <th>Coach</th>
-                    <th>Level</th>
-                    <th>Status</th>
+                    <th>Train Number/Name</th>
+                    <th>Total Coaches</th>
+                    <th>Summary (H/L/C)</th>
                     <th>Updated</th>
                   </tr>
                 </thead>

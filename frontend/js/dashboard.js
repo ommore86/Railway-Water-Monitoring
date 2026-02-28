@@ -119,46 +119,92 @@ async function loadData(query = "") {
     const res = await fetch(`${BASE}/latest${query}`, {
       headers: { Authorization: "Bearer " + token }
     });
-    const data = await res.json();
-    const table = document.getElementById("dataTable");
-    table.innerHTML = "";
+    const rawData = await res.json();
+    const tableBody = document.getElementById("dataTable");
+    tableBody.innerHTML = "";
 
-    let healthy = 0, low = 0, critical = 0;
+    // 1. Group Data by Train Number
+    const trains = {};
+    let totalHealthy = 0, totalLow = 0, totalCritical = 0;
 
-    data.forEach(row => {
-      let status = "Healthy", statusCls = "status-good";
-
-      // Logic for status and CSS classes
-      if (row.water_level < 50 && row.water_level >= 25) {
-        status = "Low";
-        statusCls = "status-low";
-        low++;
-      } else if (row.water_level < 25) {
-        status = "CRITICAL";
-        statusCls = "status-critical"; // This triggers the CSS animation
-        critical++;
-      } else {
-        healthy++;
+    rawData.forEach(row => {
+      const tNum = row.train_number;
+      if (!trains[tNum]) {
+        trains[tNum] = {
+          station: row.station_number,
+          name: row.train_name || row.train_number,
+          time: row.received_at,
+          coaches: [],
+          h: 0, l: 0, c: 0
+        };
       }
 
-      table.innerHTML += `
-                <tr>
-                    <td><b>${row.station_number}</b></td>
-                    <td>${row.train_name || row.train_number}</td>
-                    <td><span style="background:#f1f1f1; padding:2px 8px; border-radius:5px">${row.coach_number}</span></td>
-                    <td><b>${row.water_level}%</b></td>
-                    <td><span class="status-badge ${statusCls}">${status}</span></td>
-                    <td style="color:#888; font-size:0.85rem">${new Date(row.received_at).toLocaleTimeString()}</td>
-                </tr>`;
+      let status = "Healthy";
+      if (row.water_level < 25) {
+        status = "Critical"; trains[tNum].c++; totalCritical++;
+      } else if (row.water_level < 50) {
+        status = "Low"; trains[tNum].l++; totalLow++;
+      } else {
+        status = "Healthy"; trains[tNum].h++; totalHealthy++;
+      }
+
+      trains[tNum].coaches.push({ no: row.coach_number, lv: row.water_level, st: status });
     });
 
-    document.getElementById("healthyCount").innerText = healthy;
-    document.getElementById("lowCount").innerText = low;
-    document.getElementById("criticalCount").innerText = critical;
+    // 2. Render Rows
+    Object.keys(trains).forEach(tNum => {
+      const t = trains[tNum];
+      const detailId = `details-${tNum}`;
 
-    // populateFilters(stations, trains); // Keep your existing filter logic
+      tableBody.innerHTML += `
+        <tr class="train-row" onclick="toggleTrainDetails('${detailId}', this)">
+          <td><i class="fas fa-chevron-down expand-icon"></i></td>
+          <td><b>${t.station}</b></td>
+          <td>${t.name} <small>(${tNum})</small></td>
+          <td>${t.coaches.length} Coaches</td>
+          <td>
+            <span class="status-badge status-good">${t.h} H</span>
+            <span class="status-badge status-low">${t.l} L</span>
+            <span class="status-badge status-critical">${t.c} C</span>
+          </td>
+          <td>${new Date(t.time).toLocaleTimeString()}</td>
+        </tr>
+        <tr id="${detailId}" class="coach-details-row hidden">
+          <td colspan="6">
+            <div class="coach-grid">
+              ${t.coaches.map(c => `
+                <div class="coach-card card-${c.st.toLowerCase()}">
+                  <small style="color:#888">${c.no}</small>
+                  <div style="font-weight:bold; font-size:1.2rem">${c.lv}%</div>
+                  <span class="status-badge status-${c.st === 'Critical' ? 'critical' : (c.st === 'Low' ? 'low' : 'good')}" style="font-size:9px">
+                    ${c.st}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </td>
+        </tr>`;
+    });
+
+    document.getElementById("healthyCount").innerText = totalHealthy;
+    document.getElementById("lowCount").innerText = totalLow;
+    document.getElementById("criticalCount").innerText = totalCritical;
   } catch (err) {
     console.error("Fetch error:", err);
+  }
+}
+
+// Add this function at the bottom of your dashboard.js
+function toggleTrainDetails(id, rowEl) {
+  const detailsRow = document.getElementById(id);
+  const isHidden = detailsRow.classList.contains('hidden');
+
+  if (isHidden) {
+    detailsRow.classList.remove('hidden');
+    rowEl.classList.add('expanded');
+  } else {
+    detailsRow.classList.add('hidden');
+    rowEl.classList.remove('expanded');
   }
 }
 
@@ -370,9 +416,9 @@ async function updateStation() {
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const icon = document.getElementById('toggleIcon');
-  
+
   sidebar.classList.toggle('collapsed');
-  
+
   // Flip the arrow icon
   if (sidebar.classList.contains('collapsed')) {
     icon.classList.replace('fa-chevron-left', 'fa-chevron-right');
