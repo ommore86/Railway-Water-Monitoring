@@ -234,25 +234,45 @@ async function createUser() {
   loadUsers();
 }
 
+/* ---------------- UPDATE USER (Fixed) ---------------- */
 async function updateUser() {
-  const email = document.getElementById("edit_email").value;
-  const name = document.getElementById("edit_name").value;
-  const role = document.getElementById("edit_role").value;
-  const station = document.getElementById("edit_station").value;
+  const email = document.getElementById("edit_email").value.trim();
+  const name = document.getElementById("edit_name").value.trim();
+  const roleValue = document.getElementById("edit_role").value;
+  const station = document.getElementById("edit_station").value.trim();
 
-  if (!email) return alert("Email required");
+  if (!email) {
+    alert("Please enter the user's email to identify them.");
+    return;
+  }
 
-  const res = await fetch(`${BASE}/users/by-email`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ email, name, role, station_access: station })
-  });
-  const result = await res.json();
-  alert(result.message);
-  loadUsers();
+  try {
+    const res = await fetch(`${BASE}/users/by-email`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        email: email,
+        name: name || undefined,
+        role: roleValue || undefined,
+        station_access: station || undefined
+      })
+    });
+
+    const data = await res.json();
+    alert(data.message || "User updated successfully");
+    loadUsers(); // Refresh table
+    
+    // Clear inputs
+    document.getElementById("edit_email").value = "";
+    document.getElementById("edit_name").value = "";
+    document.getElementById("edit_station").value = "";
+  } catch (err) {
+    console.error("Update Error:", err);
+    alert("Failed to update user.");
+  }
 }
 
 // ---------------- MASTER DATA ----------------
@@ -284,32 +304,62 @@ async function addStation() {
   alert((await res.json()).message);
 }
 
+/* ---------------- UPDATE TRAIN ---------------- */
 async function updateTrain() {
-  const no = document.getElementById("edit_train_no").value;
-  const name = document.getElementById("edit_train_name").value;
-  const res = await fetch(`${BASE}/master/train/${no}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ train_name: name })
-  });
-  alert((await res.json()).message);
+  const no = document.getElementById("edit_train_no").value.trim();
+  const name = document.getElementById("edit_train_name").value.trim();
+
+  if (!no || !name) {
+    alert("Please enter both Train Number and New Name");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE}/master/train/${no}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ train_name: name })
+    });
+
+    const data = await res.json();
+    alert(data.message || "Train updated");
+    document.getElementById("edit_train_no").value = "";
+    document.getElementById("edit_train_name").value = "";
+  } catch (err) {
+    alert("Error updating train");
+  }
 }
 
+/* ---------------- UPDATE STATION ---------------- */
 async function updateStation() {
-  const no = document.getElementById("edit_station_no").value;
-  const name = document.getElementById("edit_station_name").value;
-  const res = await fetch(`${BASE}/master/station/${no}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ station_name: name })
-  });
-  alert((await res.json()).message);
+  const no = document.getElementById("edit_station_no").value.trim();
+  const name = document.getElementById("edit_station_name").value.trim();
+
+  if (!no || !name) {
+    alert("Please enter both Station Code and New Name");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE}/master/station/${no}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ station_name: name })
+    });
+
+    const data = await res.json();
+    alert(data.message || "Station updated");
+    document.getElementById("edit_station_no").value = "";
+    document.getElementById("edit_station_name").value = "";
+  } catch (err) {
+    alert("Error updating station");
+  }
 }
 
 // ---------------- LOGOUT ----------------
