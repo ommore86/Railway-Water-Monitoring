@@ -57,12 +57,12 @@ async function sendReset() {
         const data = await res.json();
 
         if (res.ok) {
-            alert("SUCCESS!\nYour Reset Token is: " + data.reset_token + "\n\n(In a real app, this would be emailed to you)");
+            // Updated: Alert now only confirms the email was sent
+            alert("Verification code sent! Please check your email inbox.");
             
-            // Auto-fill the token into the next modal
-            document.getElementById("rp_token").value = data.reset_token;
+            // Clear the token field so the user MUST type it from their email
+            document.getElementById("rp_token").value = "";
             
-            // Switch Modals
             forgotModal.hide();
             resetModal.show();
         } else {
