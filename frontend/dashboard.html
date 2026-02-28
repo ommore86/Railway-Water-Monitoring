@@ -17,6 +17,9 @@
       --sidebar: #1e1e2d;
       --glass: rgba(255, 255, 255, 0.9);
       --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+      /* New Variables */
+      --sidebar-width: 260px;
+      --sidebar-collapsed: 70px;
     }
 
     * {
@@ -36,12 +39,19 @@
 
     /* --- SIDEBAR --- */
     .sidebar {
-      width: 260px;
+      width: var(--sidebar-width);
       background: var(--sidebar);
       color: white;
       display: flex;
       flex-direction: column;
-      padding: 20px;
+      padding: 20px 10px;
+      position: relative;
+      flex-shrink: 0;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
     }
 
     .sidebar-header {
@@ -50,8 +60,50 @@
       margin-bottom: 40px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 15px;
       color: var(--success);
+      padding-left: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    /* Hide text when collapsed */
+    .sidebar.collapsed .sidebar-header span,
+    .sidebar.collapsed .nav-item span,
+    .sidebar.collapsed .logout-btn span {
+      display: none;
+    }
+
+    .sidebar.collapsed .nav-item {
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    /* Toggle Button */
+    .toggle-btn {
+      position: absolute;
+      top: 25px;
+      right: -15px;
+      width: 30px;
+      height: 30px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 3px solid var(--bg);
+      z-index: 1001;
+    }
+
+    /* --- SCROLLABLE TABLES (10 Rows) --- */
+    .table-container {
+      max-height: 520px;
+      /* Approx height for 10 rows */
+      overflow-y: auto;
+      margin-top: 10px;
+      border-radius: 12px;
     }
 
     .nav-links {
@@ -250,7 +302,18 @@
     table {
       width: 100%;
       border-collapse: separate;
-      border-spacing: 0 10px;
+      border-spacing: 0;
+      /* Changed to 0 for sticky header compatibility */
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 10;
+      padding: 15px;
+      border-bottom: 2px solid #f1f1f1;
+      text-align: left;
     }
 
     th {
@@ -261,10 +324,9 @@
     }
 
     td {
-      padding: 15px;
+      padding: 12px 15px;
       background: #fff;
-      border-top: 1px solid #f1f1f1;
-      border-bottom: 1px solid #f1f1f1;
+      border-bottom: 1px solid #f8f9fa;
     }
 
     tr td:first-child {
@@ -295,10 +357,13 @@
       color: var(--warning);
     }
 
+    /* --- BLINKING RED STATUS --- */
     .status-critical {
-      background: rgba(239, 35, 60, 0.1);
-      color: var(--danger);
-      animation: pulse 1.5s infinite;
+      background: rgba(239, 35, 60, 0.2) !important;
+      color: var(--danger) !important;
+      border: 1px solid var(--danger);
+      animation: blink-red 0.8s infinite;
+      font-weight: bold;
     }
 
     @keyframes pulse {
@@ -308,6 +373,20 @@
 
       50% {
         opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes blink-red {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
       }
 
       100% {
@@ -339,33 +418,38 @@
 
 <body>
 
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
+    <div class="toggle-btn" onclick="toggleSidebar()">
+      <i class="fas fa-chevron-left" id="toggleIcon"></i>
+    </div>
+
     <div class="sidebar-header">
       <i class="fas fa-train-subway"></i>
       <span>RAIL WATER</span>
     </div>
+
     <ul class="nav-links">
       <li>
         <a href="#" class="nav-item active" id="link-dashboard" onclick="showPage('dashboard')">
-          <i class="fas fa-chart-pie"></i> Dashboard
+          <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
         </a>
       </li>
-
       <li>
         <a href="#" class="nav-item hidden" id="link-users" onclick="showPage('users')">
-          <i class="fas fa-users-cog"></i> Users
+          <i class="fas fa-users-cog"></i> <span>Users</span>
         </a>
       </li>
-
       <li>
         <a href="#" class="nav-item hidden" id="link-master" onclick="showPage('master')">
-          <i class="fas fa-database"></i> Master Data
+          <i class="fas fa-database"></i> <span>Master Data</span>
         </a>
       </li>
     </ul>
-    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-      <button class="logout-btn" onclick="logout()" style="width:100%"><i class="fas fa-sign-out-alt"></i>
-        Logout</button>
+
+    <div style="padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+      <button class="logout-btn" onclick="logout()" style="width:100%">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+      </button>
     </div>
   </aside>
 
@@ -418,19 +502,21 @@
             </div>
           </div>
           <div style="overflow-x: auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Station</th>
-                  <th>Train</th>
-                  <th>Coach</th>
-                  <th>Level</th>
-                  <th>Status</th>
-                  <th>Updated</th>
-                </tr>
-              </thead>
-              <tbody id="dataTable"></tbody>
-            </table>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Station</th>
+                    <th>Train</th>
+                    <th>Coach</th>
+                    <th>Level</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="dataTable"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -470,18 +556,19 @@
           </div>
 
           <h3>Current System Users</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Access</th>
-              </tr>
-            </thead>
-            <tbody id="usersTable"></tbody>
-          </table>
-        </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Access</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable"></tbody>
+            </table>
+          </div>
       </section>
 
       <section id="masterPage" class="hidden">

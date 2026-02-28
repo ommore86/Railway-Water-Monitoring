@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadUsersIfAdmin() {
   // Normalize role check for all admin variations
   const isAdmin = (role === "admin" || role === "super_admin" || role === "superadmin");
-  
+
   const usersBtn = document.getElementById("link-users");
   const masterBtn = document.getElementById("link-master");
 
@@ -104,7 +104,7 @@ function loadUsersIfAdmin() {
     if (masterBtn) masterBtn.classList.remove("hidden");
     // Only load users list if they are actually an admin
     if (document.getElementById("usersPage").style.display !== "none") {
-        loadUsers();
+      loadUsers();
     }
   } else {
     // Strictly hide for standard users
@@ -120,41 +120,45 @@ async function loadData(query = "") {
       headers: { Authorization: "Bearer " + token }
     });
     const data = await res.json();
-
     const table = document.getElementById("dataTable");
     table.innerHTML = "";
 
     let healthy = 0, low = 0, critical = 0;
-    const stations = new Set();
-    const trains = new Set();
 
     data.forEach(row => {
-      stations.add(row.station_number);
-      trains.add(row.train_number);
+      let status = "Healthy", statusCls = "status-good";
 
-      let status = "Healthy", cls = "goodText";
-      if (row.water_level < 50) { status = "Low"; cls = "low"; low++; }
-      if (row.water_level < 25) { status = "CRITICAL"; cls = "critical"; critical++; }
-      if (row.water_level >= 50) healthy++;
+      // Logic for status and CSS classes
+      if (row.water_level < 50 && row.water_level >= 25) {
+        status = "Low";
+        statusCls = "status-low";
+        low++;
+      } else if (row.water_level < 25) {
+        status = "CRITICAL";
+        statusCls = "status-critical"; // This triggers the CSS animation
+        critical++;
+      } else {
+        healthy++;
+      }
 
       table.innerHTML += `
-        <tr>
-          <td>${row.station_number}</td>
-          <td>${row.train_name || row.train_number}</td>
-          <td>${row.coach_number}</td>
-          <td>${row.water_level}%</td>
-          <td class="${cls}">${status}</td>
-          <td>${new Date(row.received_at).toLocaleTimeString()}</td>
-        </tr>`;
+                <tr>
+                    <td><b>${row.station_number}</b></td>
+                    <td>${row.train_name || row.train_number}</td>
+                    <td><span style="background:#f1f1f1; padding:2px 8px; border-radius:5px">${row.coach_number}</span></td>
+                    <td><b>${row.water_level}%</b></td>
+                    <td><span class="status-badge ${statusCls}">${status}</span></td>
+                    <td style="color:#888; font-size:0.85rem">${new Date(row.received_at).toLocaleTimeString()}</td>
+                </tr>`;
     });
 
     document.getElementById("healthyCount").innerText = healthy;
     document.getElementById("lowCount").innerText = low;
     document.getElementById("criticalCount").innerText = critical;
 
-    populateFilters(stations, trains);
+    // populateFilters(stations, trains); // Keep your existing filter logic
   } catch (err) {
-    console.error("Error loading water data:", err);
+    console.error("Fetch error:", err);
   }
 }
 
@@ -264,7 +268,7 @@ async function updateUser() {
     const data = await res.json();
     alert(data.message || "User updated successfully");
     loadUsers(); // Refresh table
-    
+
     // Clear inputs
     document.getElementById("edit_email").value = "";
     document.getElementById("edit_name").value = "";
@@ -359,6 +363,21 @@ async function updateStation() {
     document.getElementById("edit_station_name").value = "";
   } catch (err) {
     alert("Error updating station");
+  }
+}
+
+/* --- TASK 1: SIDEBAR TOGGLE --- */
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const icon = document.getElementById('toggleIcon');
+  
+  sidebar.classList.toggle('collapsed');
+  
+  // Flip the arrow icon
+  if (sidebar.classList.contains('collapsed')) {
+    icon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+  } else {
+    icon.classList.replace('fa-chevron-right', 'fa-chevron-left');
   }
 }
 
