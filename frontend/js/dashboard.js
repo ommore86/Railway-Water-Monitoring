@@ -11,29 +11,72 @@ const name = localStorage.getItem("name");
 if (!token) window.location.href = "login.html";
 
 // ---------- PAGE NAVIGATION ----------
-function showPage(page) {
-  document.getElementById("dashboardPage").style.display = "none";
-  document.getElementById("usersPage").style.display = "none";
-  document.getElementById("masterPage").style.display = "none";
+// Add these updates to your existing dashboard.js showPage function
 
-  if (page === "dashboard") {
-    document.getElementById("dashboardPage").style.display = "block";
+// ---------- PAGE NAVIGATION WITH SECURITY GUARD ----------
+function showPage(page) {
+  const isAdmin = (role === "admin" || role === "super_admin" || role === "superadmin");
+
+  // SECURITY CHECK: If a non-admin tries to access Users or Master, force them to Dashboard
+  if (!isAdmin && (page === "users" || page === "master")) {
+    console.warn("Unauthorized access attempt blocked.");
+    page = "dashboard";
   }
+
+  // Hide all sections using the 'hidden' class from our stylish CSS
+  document.getElementById("dashboardPage").classList.add("hidden");
+  document.getElementById("usersPage").classList.add("hidden");
+  document.getElementById("masterPage").classList.add("hidden");
+
+  // Remove active class from all nav items
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+  // Show selected section and update UI
+  if (page === "dashboard") {
+    document.getElementById("dashboardPage").classList.remove("hidden");
+    document.getElementById("link-dashboard").classList.add("active");
+    document.getElementById("pageTitle").innerText = "Live Dashboard";
+    loadData(currentFilter);
+  }
+
   if (page === "users") {
-    document.getElementById("usersPage").style.display = "block";
+    document.getElementById("usersPage").classList.remove("hidden");
+    document.getElementById("link-users").classList.add("active");
+    document.getElementById("pageTitle").innerText = "User Management";
     loadUsers();
   }
+
   if (page === "master") {
-    document.getElementById("masterPage").style.display = "block";
+    document.getElementById("masterPage").classList.remove("hidden");
+    document.getElementById("link-master").classList.add("active");
+    document.getElementById("pageTitle").innerText = "Master Data Registry";
   }
 }
+
+// Update your loadData table rows to use the new "status-badge" classes
+// Inside loadData data.forEach:
+/*
+  let status = "Healthy", statusCls = "status-good";
+  if (row.water_level < 50) { status = "Low"; statusCls = "status-low"; }
+  if (row.water_level < 25) { status = "CRITICAL"; statusCls = "status-critical"; }
+
+  table.innerHTML += `
+    <tr>
+      <td><b>${row.station_number}</b></td>
+      <td>${row.train_name || row.train_number}</td>
+      <td><span style="background:#eee; padding:2px 8px; border-radius:5px">${row.coach_number}</span></td>
+      <td><b>${row.water_level}%</b></td>
+      <td><span class="status-badge ${statusCls}">${status}</span></td>
+      <td style="color:#888; font-size:0.85rem">${new Date(row.received_at).toLocaleTimeString()}</td>
+    </tr>`;
+*/
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loginInfo").innerText = `👤 ${name} (${role})`;
 
   // Initial Data Load
   loadData();
-  
+
   // Setup Admin Buttons and Initial Page
   loadUsersIfAdmin();
   showPage("dashboard");
@@ -50,17 +93,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ---------------- ADMIN DETECTION ----------------
 function loadUsersIfAdmin() {
+  // Normalize role check for all admin variations
   const isAdmin = (role === "admin" || role === "super_admin" || role === "superadmin");
   
-  const usersBtn = document.getElementById("usersBtn");
-  const masterBtn = document.getElementById("masterBtn");
+  const usersBtn = document.getElementById("link-users");
+  const masterBtn = document.getElementById("link-master");
 
   if (isAdmin) {
-    if (usersBtn) usersBtn.style.display = "inline-block";
-    if (masterBtn) masterBtn.style.display = "inline-block";
+    if (usersBtn) usersBtn.classList.remove("hidden");
+    if (masterBtn) masterBtn.classList.remove("hidden");
+    // Only load users list if they are actually an admin
+    if (document.getElementById("usersPage").style.display !== "none") {
+        loadUsers();
+    }
   } else {
-    if (usersBtn) usersBtn.style.display = "none";
-    if (masterBtn) masterBtn.style.display = "none";
+    // Strictly hide for standard users
+    if (usersBtn) usersBtn.classList.add("hidden");
+    if (masterBtn) masterBtn.classList.add("hidden");
   }
 }
 
@@ -133,10 +182,10 @@ function populateFilters(stations, trains) {
   const t = document.getElementById("filterTrain");
 
   stations.forEach(v => {
-    if(v) s.innerHTML += `<option value="${v}">${v}</option>`;
+    if (v) s.innerHTML += `<option value="${v}">${v}</option>`;
   });
   trains.forEach(v => {
-    if(v) t.innerHTML += `<option value="${v}">${v}</option>`;
+    if (v) t.innerHTML += `<option value="${v}">${v}</option>`;
   });
   firstLoad = false;
 }

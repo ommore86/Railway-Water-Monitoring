@@ -4,268 +4,509 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Railway Water Monitoring</title>
-  <link rel="stylesheet" href="css/style.css">
-
+  <title>Railway Water Monitoring | Pro Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* fallback styling if css not loaded */
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --danger: #ef233c;
+      --bg: #f8f9fa;
+      --sidebar: #1e1e2d;
+      --glass: rgba(255, 255, 255, 0.9);
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      transition: all 0.3s ease;
+    }
+
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f4f6fa;
-      margin: 0
+      margin: 0;
+      background-color: var(--bg);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      color: #333;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .sidebar-header {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--success);
+    }
+
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      flex-grow: 1;
+    }
+
+    .nav-links li {
+      margin-bottom: 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #a2a3b7;
+      text-decoration: none;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .nav-item i {
+      width: 20px;
+    }
+
+    /* --- MAIN CONTENT --- */
+    .main-content {
+      flex-grow: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
     .topbar {
-      background: #0d6efd;
-      color: #fff;
-      padding: 15px 20px;
+      padding: 15px 30px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
       display: flex;
       justify-content: space-between;
-      align-items: center
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #eee;
     }
 
-    .topbar button {
-      background: #fff;
-      color: #0d6efd;
+    .user-pill {
+      background: #eee;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: var(--danger);
+      color: white;
       border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 8px 15px;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: bold
     }
 
-    .cards {
-      display: flex;
+    .content-area {
+      padding: 30px;
+    }
+
+    /* --- DASHBOARD CARDS --- */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
-      padding: 20px
+      margin-bottom: 30px;
     }
 
-    .card {
-      flex: 1;
+    .stat-card {
       background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      right: -20px;
+      top: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    .stat-card.good::after {
+      background: var(--success);
+    }
+
+    .stat-card.warning::after {
+      background: var(--warning);
+    }
+
+    .stat-card.danger::after {
+      background: var(--danger);
+    }
+
+    .icon-box {
+      width: 50px;
+      height: 50px;
       border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, .1)
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
     }
 
-    .good {
-      border-left: 8px solid #28a745
+    .good .icon-box {
+      background: rgba(76, 201, 240, 0.1);
+      color: var(--success);
     }
 
-    .warning {
-      border-left: 8px solid #ffc107
+    .warning .icon-box {
+      background: rgba(247, 37, 133, 0.1);
+      color: var(--warning);
     }
 
-    .danger {
-      border-left: 8px solid #dc3545
+    .danger .icon-box {
+      background: rgba(239, 35, 60, 0.1);
+      color: var(--danger);
     }
 
-    .card p {
-      font-size: 28px;
-      margin: 10px 0 0
+    .stat-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 5px 0;
     }
 
-    .table-section {
-      padding: 20px
+    .stat-label {
+      color: #888;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* --- TABLES --- */
+    .glass-panel {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    select,
+    input {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      outline: none;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden
-    }
-
-    th,
-    td {
-      padding: 12px;
-      text-align: center;
-      border-bottom: 1px solid #eee
+      border-collapse: separate;
+      border-spacing: 0 10px;
     }
 
     th {
-      background: #0d6efd;
-      color: white
+      padding: 15px;
+      color: #888;
+      font-weight: 500;
+      text-align: left;
     }
 
-    .goodText {
-      color: #28a745;
-      font-weight: bold
+    td {
+      padding: 15px;
+      background: #fff;
+      border-top: 1px solid #f1f1f1;
+      border-bottom: 1px solid #f1f1f1;
     }
 
-    .low {
-      color: #ffc107;
-      font-weight: bold
+    tr td:first-child {
+      border-left: 1px solid #f1f1f1;
+      border-radius: 12px 0 0 12px;
     }
 
-    .critical {
-      color: #dc3545;
+    tr td:last-child {
+      border-right: 1px solid #f1f1f1;
+      border-radius: 0 12px 12px 0;
+    }
+
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
       font-weight: bold;
-      animation: blink 1s infinite
+      text-transform: uppercase;
     }
 
-    @keyframes blink {
+    .status-good {
+      background: rgba(76, 201, 240, 0.1);
+      color: var(--success);
+    }
+
+    .status-low {
+      background: rgba(247, 37, 133, 0.1);
+      color: var(--warning);
+    }
+
+    .status-critical {
+      background: rgba(239, 35, 60, 0.1);
+      color: var(--danger);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
       50% {
-        opacity: 0.3
+        opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
       }
     }
 
-    /* scrollable table */
-    .table-container {
-      max-height: 420px;
-      overflow-y: auto;
-      border-radius: 10px;
+    /* --- FORMS --- */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
-    .table-container thead th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
+    .form-section {
+      background: #fcfcfc;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid #eee;
+      margin-bottom: 20px;
     }
-    
-    .mt-4 { margin-top: 20px; }
+
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 
 <body>
 
-  <header class="topbar">
-    <h2>🚆 Railway Water Monitoring</h2>
-
-    <div style="display:flex;align-items:center;gap:15px">
-      <button onclick="showPage('dashboard')">Dashboard</button>
-      <button onclick="showPage('users')" id="usersBtn" style="display:none;">Users</button>
-      <button onclick="showPage('master')" id="masterBtn" style="display:none;">Master Data</button>
-
-      <span id="loginInfo"></span>
-      <button onclick="logout()">Logout</button>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="fas fa-train-subway"></i>
+      <span>RAIL WATER</span>
     </div>
-  </header>
+    <ul class="nav-links">
+      <li>
+        <a href="#" class="nav-item active" id="link-dashboard" onclick="showPage('dashboard')">
+          <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+      </li>
 
-  <section id="dashboardPage">
-    <section class="cards">
-      <div class="card good">
-        <h3>Healthy Coaches</h3>
-        <p id="healthyCount">0</p>
-      </div>
+      <li>
+        <a href="#" class="nav-item hidden" id="link-users" onclick="showPage('users')">
+          <i class="fas fa-users-cog"></i> Users
+        </a>
+      </li>
 
-      <div class="card warning">
-        <h3>Low Water</h3>
-        <p id="lowCount">0</p>
-      </div>
-
-      <div class="card danger">
-        <h3>Critical</h3>
-        <p id="criticalCount">0</p>
-      </div>
-    </section>
-
-    <section class="table-section">
-      <h2>Live Coach Water Status</h2>
-      <div style="margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap">
-        <select id="filterStation">
-          <option value="">All Stations</option>
-        </select>
-        <select id="filterTrain">
-          <option value="">All Trains</option>
-        </select>
-        <button onclick="applyFilter()">Apply Filter</button>
-        <button onclick="clearFilter()">Clear</button>
-      </div>
-
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Station</th>
-              <th>Train</th>
-              <th>Coach</th>
-              <th>Water Level</th>
-              <th>Status</th>
-              <th>Time</th>
-            </tr>
-          </thead>
-          <tbody id="dataTable"></tbody>
-        </table>
-      </div>
-    </section>
-  </section>
-
-  <section id="usersPage" style="display:none;padding:30px">
-    <h2>👨‍💼 User Management</h2>
-    <div style="background:white; padding:15px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.08);">
-      <h3>Create User</h3>
-      <div style="display:flex;flex-wrap:wrap;gap:10px">
-        <input id="u_name" placeholder="Name">
-        <input id="u_email" placeholder="Email">
-        <input id="u_pass" placeholder="Password">
-        <select id="u_role">
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-        <input id="u_station" placeholder="Station Code (ST01)">
-        <button onclick="createUser()">Create</button>
-      </div>
-
-      <h3 class="mt-4">Update Existing User</h3>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <input id="edit_email" placeholder="User Email">
-        <input id="edit_name" placeholder="New Name">
-        <select id="edit_role">
-          <option value="">Keep Role Same</option>
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-        <input id="edit_station" placeholder="New Station (optional)">
-        <button onclick="updateUser()">Update User</button>
-      </div>
+      <li>
+        <a href="#" class="nav-item hidden" id="link-master" onclick="showPage('master')">
+          <i class="fas fa-database"></i> Master Data
+        </a>
+      </li>
+    </ul>
+    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+      <button class="logout-btn" onclick="logout()" style="width:100%"><i class="fas fa-sign-out-alt"></i>
+        Logout</button>
     </div>
+  </aside>
 
-    <h3>All Users</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Station Access</th>
-        </tr>
-      </thead>
-      <tbody id="usersTable"></tbody>
-    </table>
-  </section>
-
-  <section id="masterPage" style="display:none;padding:30px">
-    <h2>⚙️ Master Data Management</h2>
-    <div style="display:flex;gap:40px;margin-top:20px">
-      <div style="flex:1;background:white;padding:15px;border-radius:10px">
-        <h3>Add Train</h3>
-        <input id="train_no" placeholder="Train Number">
-        <input id="train_name" placeholder="Train Name">
-        <button onclick="addTrain()">Add Train</button>
-
-        <h3 style="margin-top:20px">Update Train</h3>
-        <input id="edit_train_no" placeholder="Train Number">
-        <input id="edit_train_name" placeholder="New Name">
-        <button onclick="updateTrain()">Update Train</button>
+  <main class="main-content">
+    <header class="topbar">
+      <h2 id="pageTitle">Live Dashboard</h2>
+      <div style="display:flex; align-items:center; gap:15px">
+        <span class="user-pill" id="loginInfo">👤 Loading...</span>
       </div>
+    </header>
 
-      <div style="flex:1;background:white;padding:15px;border-radius:10px">
-        <h3>Add Station</h3>
-        <input id="station_no" placeholder="Station Number">
-        <input id="station_name" placeholder="Station Name">
-        <button onclick="addStation()">Add Station</button>
+    <div class="content-area">
 
-        <h3 style="margin-top:20px">Update Station</h3>
-        <input id="edit_station_no" placeholder="Station Number">
-        <input id="edit_station_name" placeholder="New Name">
-        <button onclick="updateStation()">Update Station</button>
-      </div>
+      <section id="dashboardPage">
+        <div class="cards-grid">
+          <div class="stat-card good">
+            <div class="icon-box"><i class="fas fa-droplet"></i></div>
+            <div>
+              <div class="stat-label">Healthy Coaches</div>
+              <div class="stat-val" id="healthyCount">0</div>
+            </div>
+          </div>
+          <div class="stat-card warning">
+            <div class="icon-box"><i class="fas fa-faucet-drip"></i></div>
+            <div>
+              <div class="stat-label">Low Water</div>
+              <div class="stat-val" id="lowCount">0</div>
+            </div>
+          </div>
+          <div class="stat-card danger">
+            <div class="icon-box"><i class="fas fa-triangle-exclamation"></i></div>
+            <div>
+              <div class="stat-label">Critical Level</div>
+              <div class="stat-val" id="criticalCount">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <div class="table-header">
+            <h3>Coach Status Monitoring</h3>
+            <div class="filter-group">
+              <select id="filterStation">
+                <option value="">All Stations</option>
+              </select>
+              <select id="filterTrain">
+                <option value="">All Trains</option>
+              </select>
+              <button class="primary" onclick="applyFilter()">Filter</button>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Station</th>
+                  <th>Train</th>
+                  <th>Coach</th>
+                  <th>Level</th>
+                  <th>Status</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody id="dataTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="usersPage" class="hidden">
+        <div class="glass-panel">
+          <h3>User Administration</h3>
+          <div class="form-section">
+            <h4>Create New User</h4>
+            <div class="form-grid">
+              <input id="u_name" placeholder="Full Name">
+              <input id="u_email" placeholder="Email Address">
+              <input id="u_pass" type="password" placeholder="Password">
+              <select id="u_role">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+              <input id="u_station" placeholder="Station (e.g. ST01)">
+              <button class="primary" onclick="createUser()">Add User</button>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h4>Update Existing User</h4>
+            <div class="form-grid">
+              <input id="edit_email" placeholder="User Email to search">
+              <input id="edit_name" placeholder="New Name">
+              <select id="edit_role">
+                <option value="">No Role Change</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+              <button class="primary" onclick="updateUser()">Update</button>
+            </div>
+          </div>
+
+          <h3>Current System Users</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody id="usersTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="masterPage" class="hidden">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="glass-panel">
+            <h3><i class="fas fa-train"></i> Train Master</h3>
+            <div class="form-section">
+              <input id="train_no" placeholder="Number" style="width:100%; margin-bottom:10px;">
+              <input id="train_name" placeholder="Name" style="width:100%; margin-bottom:10px;">
+              <button class="primary" onclick="addTrain()" style="width:100%">Register Train</button>
+            </div>
+          </div>
+          <div class="glass-panel">
+            <h3><i class="fas fa-building"></i> Station Master</h3>
+            <div class="form-section">
+              <input id="station_no" placeholder="Code" style="width:100%; margin-bottom:10px;">
+              <input id="station_name" placeholder="Name" style="width:100%; margin-bottom:10px;">
+              <button class="primary" onclick="addStation()" style="width:100%">Register Station</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
-  </section>
+  </main>
 
-  <script src="js/dashboard.js?v=3"></script>
+  <script src="js/dashboard.js?v=4"></script>
 </body>
+
 </html>
