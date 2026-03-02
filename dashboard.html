@@ -603,6 +603,318 @@
         border-top-color: transparent;
       }
     }
+
+    /* --- USER PROFILE DROPDOWN --- */
+    .user-pill-wrapper {
+      position: relative;
+    }
+
+    .user-pill {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .user-pill:hover {
+      background: #ddd;
+    }
+
+    .profile-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      min-width: 300px;
+      z-index: 9999;
+      overflow: hidden;
+      border: 1px solid #eee;
+    }
+
+    .profile-dropdown.show {
+      display: block;
+      animation: fadeSlideIn 0.25s ease;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .profile-dropdown-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .profile-dropdown-header .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin: 0 auto 10px;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+
+    .profile-dropdown-header h4 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .profile-dropdown-header small {
+      opacity: 0.8;
+      font-size: 0.8rem;
+    }
+
+    .profile-dropdown-body {
+      padding: 15px 20px;
+    }
+
+    .profile-info-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f1f1;
+      font-size: 0.9rem;
+    }
+
+    .profile-info-row:last-child {
+      border-bottom: none;
+    }
+
+    .profile-info-row i {
+      width: 20px;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .profile-info-row .label {
+      color: #888;
+      min-width: 60px;
+    }
+
+    .profile-info-row .value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .station-badge {
+      background: linear-gradient(135deg, #4361ee, #3f37c9);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .profile-dropdown-footer {
+      padding: 10px 20px 15px;
+      border-top: 1px solid #f1f1f1;
+    }
+
+    .profile-dropdown-footer button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn-change-pwd {
+      background: #f0f4ff;
+      color: var(--primary);
+    }
+
+    .btn-change-pwd:hover {
+      background: #dce4ff;
+    }
+
+    /* --- CHANGE PASSWORD MODAL --- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeSlideIn 0.25s ease;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      width: 400px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-box h3 {
+      margin: 0 0 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-box p.subtitle {
+      color: #888;
+      font-size: 0.85rem;
+      margin: 0 0 20px;
+    }
+
+    .modal-box .form-group {
+      margin-bottom: 15px;
+    }
+
+    .modal-box .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .modal-box .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .modal-box .form-group input:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-cancel {
+      background: #f1f1f1;
+      color: #666;
+    }
+
+    .btn-cancel:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-save {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-save:hover {
+      background: var(--secondary);
+    }
+
+    .pwd-msg {
+      text-align: center;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+
+    .pwd-msg.error { color: var(--danger); }
+    .pwd-msg.success { color: #27ae60; }
+
+    /* --- COMPACT INLINE FORM CARDS (Todo-app style) --- */
+    .inline-form-card {
+      background: white;
+      padding: 20px 25px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      border: 1px solid #f0f0f0;
+    }
+
+    .inline-form-card h4 {
+      margin: 0 0 15px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+    }
+
+    .inline-form-card h4 i {
+      color: var(--primary);
+    }
+
+    .inline-form-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .inline-form-row input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .inline-form-row input:focus {
+      border-color: var(--primary);
+    }
+
+    .inline-form-row button {
+      padding: 12px 24px;
+      white-space: nowrap;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* --- HIGHLIGHT ROW ANIMATION --- */
+    @keyframes highlightRow {
+      0% { background: #d4edda; }
+      70% { background: #d4edda; }
+      100% { background: transparent; }
+    }
+
+    .row-highlight {
+      animation: highlightRow 3s ease;
+    }
   </style>
 </head>
 
@@ -630,8 +942,13 @@
         </a>
       </li>
       <li>
-        <a href="#" class="nav-item hidden" id="link-master" onclick="showPage('master')">
-          <i class="fas fa-database"></i> <span>Master Data</span>
+        <a href="#" class="nav-item hidden" id="link-train" onclick="showPage('train')">
+          <i class="fas fa-train"></i> <span>Train Master</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-item hidden" id="link-station" onclick="showPage('station')">
+          <i class="fas fa-building"></i> <span>Station Master</span>
         </a>
       </li>
     </ul>
@@ -647,7 +964,33 @@
     <header class="topbar">
       <h2 id="pageTitle">Live Dashboard</h2>
       <div style="display:flex; align-items:center; gap:15px">
-        <span class="user-pill" id="loginInfo">👤 Loading...</span>
+        <div class="user-pill-wrapper">
+          <span class="user-pill" id="loginInfo" onclick="toggleProfileDropdown()">👤 Loading...</span>
+          <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-dropdown-header">
+              <div class="avatar"><i class="fas fa-user"></i></div>
+              <h4 id="profileName">Loading...</h4>
+              <small id="profileEmail">loading...</small>
+            </div>
+            <div class="profile-dropdown-body">
+              <div class="profile-info-row">
+                <i class="fas fa-shield-halved"></i>
+                <span class="label">Role</span>
+                <span class="value" id="profileRole">-</span>
+              </div>
+              <div class="profile-info-row">
+                <i class="fas fa-train"></i>
+                <span class="label">Station</span>
+                <span class="value" id="profileStation"><span class="station-badge">-</span></span>
+              </div>
+            </div>
+            <div class="profile-dropdown-footer">
+              <button class="btn-change-pwd" onclick="openChangePassword()">
+                <i class="fas fa-key"></i> Change Password
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -767,70 +1110,105 @@
           </div>
       </section>
 
-      <section id="masterPage" class="hidden">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-
-          <div class="glass-panel">
-            <h3><i class="fas fa-train"></i> Train Master</h3>
-
-            <div class="form-section">
-              <h4>Add Train</h4>
-              <input id="train_no" placeholder="Train Number" style="width:100%; margin-bottom:10px;">
-              <input id="train_name" placeholder="Train Name" style="width:100%; margin-bottom:10px;">
-              <button class="primary" onclick="addTrain()" style="width:100%">Register Train</button>
-            </div>
-
-            <div class="form-section">
-              <h4>Update Train</h4>
-              <input id="edit_train_no" placeholder="Train Number (to find)" style="width:100%; margin-bottom:10px;">
-              <input id="edit_train_name" placeholder="New Train Name" style="width:100%; margin-bottom:10px;">
-              <button class="primary" onclick="updateTrain()" style="width:100%">Update Train Name</button>
-            </div>
+      <section id="trainPage" class="hidden">
+        <div class="inline-form-card">
+          <h4><i class="fas fa-plus-circle"></i> Add Train</h4>
+          <div class="inline-form-row">
+            <input id="train_no" placeholder="Train Number">
+            <input id="train_name" placeholder="Train Name">
+            <button class="primary" onclick="addTrain()">Register Train</button>
           </div>
+        </div>
 
-          <div class="glass-panel">
-            <h3><i class="fas fa-building"></i> Station Master</h3>
+        <div class="inline-form-card">
+          <h4><i class="fas fa-pen-to-square"></i> Update Train</h4>
+          <div class="inline-form-row">
+            <input id="edit_train_no" placeholder="Train Number (to find)">
+            <input id="edit_train_name" placeholder="New Train Name">
+            <button class="primary" onclick="updateTrain()">Update Train</button>
+          </div>
+        </div>
 
-            <div class="form-section">
-              <h4>Add Station</h4>
-              <input id="station_no" placeholder="Station Code" style="width:100%; margin-bottom:10px;">
-              <input id="station_name" placeholder="Station Name" style="width:100%; margin-bottom:10px;">
-              <button class="primary" onclick="addStation()" style="width:100%">Register Station</button>
-            </div>
-
-            <div class="form-section">
-              <h4>Update Station</h4>
-              <input id="edit_station_no" placeholder="Station Code (to find)" style="width:100%; margin-bottom:10px;">
-              <input id="edit_station_name" placeholder="New Station Name" style="width:100%; margin-bottom:10px;">
-              <button class="primary" onclick="updateStation()" style="width:100%">Update Station Name</button>
-            </div>
+        <div class="inline-form-card">
+          <h4><i class="fas fa-list"></i> All Trains</h4>
+          <div class="table-container" style="max-height:400px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Train Number</th>
+                  <th>Train Name</th>
+                </tr>
+              </thead>
+              <tbody id="trainListTable"></tbody>
+            </table>
           </div>
         </div>
       </section>
 
-      <section id="masterPage" class="hidden">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-          <div class="glass-panel">
-            <h3><i class="fas fa-train"></i> Train Master</h3>
-            <div class="form-section">
-              <input id="train_no" placeholder="Number" style="width:100%; margin-bottom:10px;">
-              <input id="train_name" placeholder="Name" style="width:100%; margin-bottom:10px;">
-              <button class="primary" onclick="addTrain()" style="width:100%">Register Train</button>
-            </div>
+      <section id="stationPage" class="hidden">
+        <div class="inline-form-card">
+          <h4><i class="fas fa-plus-circle"></i> Add Station</h4>
+          <div class="inline-form-row">
+            <input id="station_no" placeholder="Station Code">
+            <input id="station_name" placeholder="Station Name">
+            <button class="primary" onclick="addStation()">Register Station</button>
           </div>
-          <div class="glass-panel">
-            <h3><i class="fas fa-building"></i> Station Master</h3>
-            <div class="form-section">
-              <input id="station_no" placeholder="Code" style="width:100%; margin-bottom:10px;">
-              <input id="station_name" placeholder="Name" style="width:100%; margin-bottom:10px;">
-              <button class="primary" onclick="addStation()" style="width:100%">Register Station</button>
-            </div>
+        </div>
+
+        <div class="inline-form-card">
+          <h4><i class="fas fa-pen-to-square"></i> Update Station</h4>
+          <div class="inline-form-row">
+            <input id="edit_station_no" placeholder="Station Code (to find)">
+            <input id="edit_station_name" placeholder="New Station Name">
+            <button class="primary" onclick="updateStation()">Update Station</button>
+          </div>
+        </div>
+
+        <div class="inline-form-card">
+          <h4><i class="fas fa-list"></i> All Stations</h4>
+          <div class="table-container" style="max-height:400px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Station Code</th>
+                  <th>Station Name</th>
+                </tr>
+              </thead>
+              <tbody id="stationListTable"></tbody>
+            </table>
           </div>
         </div>
       </section>
 
     </div>
   </main>
+
+  <!-- Change Password Modal -->
+  <div class="modal-overlay" id="changePwdModal">
+    <div class="modal-box">
+      <h3><i class="fas fa-lock" style="color:var(--primary)"></i> Change Password</h3>
+      <p class="subtitle">Enter your current password and choose a new one</p>
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" id="currentPwd" placeholder="Enter current password">
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="newPwd" placeholder="Minimum 6 characters">
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <input type="password" id="confirmPwd" placeholder="Re-enter new password">
+      </div>
+      <div class="pwd-msg" id="pwdMsg"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeChangePassword()">Cancel</button>
+        <button class="btn-save" onclick="submitChangePassword()">Update Password</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/dashboard.js?v=4"></script>
 </body>

@@ -3,6 +3,26 @@ const router=express.Router();
 const db=require("../config/mysql");
 const {verifyToken,allowRoles}=require("../middleware/authMiddleware");
 
+/* GET ALL TRAINS */
+router.get("/trains",verifyToken,async(req,res)=>{
+  try{
+    const [rows]=await db.query("SELECT train_number,train_name FROM trains ORDER BY train_number");
+    res.json(rows);
+  }catch(err){
+    res.status(500).json({error:"Failed to fetch trains"});
+  }
+});
+
+/* GET ALL STATIONS */
+router.get("/stations",verifyToken,async(req,res)=>{
+  try{
+    const [rows]=await db.query("SELECT station_number,station_name FROM stations ORDER BY station_number");
+    res.json(rows);
+  }catch(err){
+    res.status(500).json({error:"Failed to fetch stations"});
+  }
+});
+
 /* ADD TRAIN */
 router.post("/train",verifyToken,allowRoles("admin","super_admin"),async(req,res)=>{
   const {train_number,train_name}=req.body;

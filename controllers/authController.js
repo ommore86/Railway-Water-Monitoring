@@ -151,3 +151,36 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: "Reset failed" });
   }
 };
+
+/* ================= CHANGE PASSWORD (Logged-in User) ================= */
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id; // from JWT middleware
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword)
+      return res.status(400).json({ message: "Both current and new password are required" });
+
+    if (newPassword.length < 6)
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+
+    // Get user's current hashed password
+    const [rows] = await db.query("SELECT password FROM users WHERE id=?", [userId]);
+    if (!rows.length)
+      return res.status(404).json({ message: "User not found" });
+
+    // Verify current password
+    const match = await bcrypt.compare(currentPassword, rows[0].password);
+    if (!match)
+      return res.status(401).json({ message: "Current password is incorrect" });
+
+    // Hash and save new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await db.query("UPDATE users SET password=? WHERE id=?", [hashed, userId]);
+
+    res.json({ message: "Password changed successfully!" });
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({ message: "Failed to change password" });
+  }
+};

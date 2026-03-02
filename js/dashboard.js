@@ -18,16 +18,17 @@ if (!token) window.location.href = "login.html";
 function showPage(page) {
   const isAdmin = (role === "admin" || role === "super_admin" || role === "superadmin");
 
-  // SECURITY CHECK: If a non-admin tries to access Users or Master, force them to Dashboard
-  if (!isAdmin && (page === "users" || page === "master")) {
+  // SECURITY CHECK: If a non-admin tries to access restricted pages, force them to Dashboard
+  if (!isAdmin && (page === "users" || page === "train" || page === "station")) {
     console.warn("Unauthorized access attempt blocked.");
     page = "dashboard";
   }
 
-  // Hide all sections using the 'hidden' class from our stylish CSS
+  // Hide all sections
   document.getElementById("dashboardPage").classList.add("hidden");
   document.getElementById("usersPage").classList.add("hidden");
-  document.getElementById("masterPage").classList.add("hidden");
+  document.getElementById("trainPage").classList.add("hidden");
+  document.getElementById("stationPage").classList.add("hidden");
 
   // Remove active class from all nav items
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -47,10 +48,18 @@ function showPage(page) {
     loadUsers();
   }
 
-  if (page === "master") {
-    document.getElementById("masterPage").classList.remove("hidden");
-    document.getElementById("link-master").classList.add("active");
-    document.getElementById("pageTitle").innerText = "Master Data Registry";
+  if (page === "train") {
+    document.getElementById("trainPage").classList.remove("hidden");
+    document.getElementById("link-train").classList.add("active");
+    document.getElementById("pageTitle").innerText = "Train Master";
+    loadTrains();
+  }
+
+  if (page === "station") {
+    document.getElementById("stationPage").classList.remove("hidden");
+    document.getElementById("link-station").classList.add("active");
+    document.getElementById("pageTitle").innerText = "Station Master";
+    loadStations();
   }
 }
 
@@ -75,6 +84,15 @@ function showPage(page) {
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loginInfo").innerText = `👤 ${name} (${role})`;
 
+  // Populate profile dropdown
+  const email = localStorage.getItem("email") || "";
+  const station = localStorage.getItem("station") || "";
+  document.getElementById("profileName").innerText = name || "User";
+  document.getElementById("profileEmail").innerText = email;
+  document.getElementById("profileRole").innerText = (role || "user").toUpperCase();
+  document.getElementById("profileStation").innerHTML =
+    station ? `<span class="station-badge">${station}</span>` : '<span style="color:#aaa">Not Assigned</span>';
+
   // Initial Data Load
   loadData();
 
@@ -91,6 +109,15 @@ document.addEventListener("DOMContentLoaded", () => {
       loadData(currentFilter);
     }
   }, 5000);
+
+  // Close profile dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    const wrapper = document.querySelector(".user-pill-wrapper");
+    const dropdown = document.getElementById("profileDropdown");
+    if (wrapper && !wrapper.contains(e.target)) {
+      dropdown.classList.remove("show");
+    }
+  });
 });
 
 // ---------------- ADMIN DETECTION ----------------
@@ -99,11 +126,13 @@ function loadUsersIfAdmin() {
   const isAdmin = (role === "admin" || role === "super_admin" || role === "superadmin");
 
   const usersBtn = document.getElementById("link-users");
-  const masterBtn = document.getElementById("link-master");
+  const trainBtn = document.getElementById("link-train");
+  const stationBtn = document.getElementById("link-station");
 
   if (isAdmin) {
     if (usersBtn) usersBtn.classList.remove("hidden");
-    if (masterBtn) masterBtn.classList.remove("hidden");
+    if (trainBtn) trainBtn.classList.remove("hidden");
+    if (stationBtn) stationBtn.classList.remove("hidden");
     // Only load users list if they are actually an admin
     if (document.getElementById("usersPage").style.display !== "none") {
       loadUsers();
@@ -111,7 +140,8 @@ function loadUsersIfAdmin() {
   } else {
     // Strictly hide for standard users
     if (usersBtn) usersBtn.classList.add("hidden");
-    if (masterBtn) masterBtn.classList.add("hidden");
+    if (trainBtn) trainBtn.classList.add("hidden");
+    if (stationBtn) stationBtn.classList.add("hidden");
   }
 }
 
@@ -365,9 +395,73 @@ async function updateUser() {
 }
 
 // ---------------- MASTER DATA ----------------
+let highlightTrainNo = null;
+let highlightStationNo = null;
+
+async function loadTrains() {
+  try {
+    const res = await fetch(`${BASE}/master/trains`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const trains = await res.json();
+    const table = document.getElementById("trainListTable");
+    table.innerHTML = "";
+
+    trains.forEach((t, i) => {
+      const isHighlight = (highlightTrainNo && t.train_number === highlightTrainNo);
+      table.innerHTML += `
+        <tr class="${isHighlight ? 'row-highlight' : ''}">
+          <td>${i + 1}</td>
+          <td><b>${t.train_number}</b></td>
+          <td>${t.train_name}</td>
+        </tr>`;
+    });
+
+    // Scroll to highlighted row
+    if (highlightTrainNo) {
+      const highlighted = table.querySelector('.row-highlight');
+      if (highlighted) highlighted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => { highlightTrainNo = null; }, 3500);
+    }
+  } catch (err) {
+    console.error("Error loading trains:", err);
+  }
+}
+
+async function loadStations() {
+  try {
+    const res = await fetch(`${BASE}/master/stations`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const stations = await res.json();
+    const table = document.getElementById("stationListTable");
+    table.innerHTML = "";
+
+    stations.forEach((s, i) => {
+      const isHighlight = (highlightStationNo && s.station_number === highlightStationNo);
+      table.innerHTML += `
+        <tr class="${isHighlight ? 'row-highlight' : ''}">
+          <td>${i + 1}</td>
+          <td><b>${s.station_number}</b></td>
+          <td>${s.station_name}</td>
+        </tr>`;
+    });
+
+    if (highlightStationNo) {
+      const highlighted = table.querySelector('.row-highlight');
+      if (highlighted) highlighted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => { highlightStationNo = null; }, 3500);
+    }
+  } catch (err) {
+    console.error("Error loading stations:", err);
+  }
+}
+
 async function addTrain() {
-  const train_number = document.getElementById("train_no").value;
-  const train_name = document.getElementById("train_name").value;
+  const train_number = document.getElementById("train_no").value.trim();
+  const train_name = document.getElementById("train_name").value.trim();
+  if (!train_number || !train_name) return alert("Please fill both fields");
+
   const res = await fetch(`${BASE}/master/train`, {
     method: "POST",
     headers: {
@@ -376,12 +470,22 @@ async function addTrain() {
     },
     body: JSON.stringify({ train_number, train_name })
   });
-  alert((await res.json()).message);
+  const data = await res.json();
+  alert(data.message || data.error);
+
+  if (res.ok) {
+    document.getElementById("train_no").value = "";
+    document.getElementById("train_name").value = "";
+    highlightTrainNo = train_number;
+    loadTrains();
+  }
 }
 
 async function addStation() {
-  const station_number = document.getElementById("station_no").value;
-  const station_name = document.getElementById("station_name").value;
+  const station_number = document.getElementById("station_no").value.trim();
+  const station_name = document.getElementById("station_name").value.trim();
+  if (!station_number || !station_name) return alert("Please fill both fields");
+
   const res = await fetch(`${BASE}/master/station`, {
     method: "POST",
     headers: {
@@ -390,7 +494,15 @@ async function addStation() {
     },
     body: JSON.stringify({ station_number, station_name })
   });
-  alert((await res.json()).message);
+  const data = await res.json();
+  alert(data.message || data.error);
+
+  if (res.ok) {
+    document.getElementById("station_no").value = "";
+    document.getElementById("station_name").value = "";
+    highlightStationNo = station_number;
+    loadStations();
+  }
 }
 
 /* ---------------- UPDATE TRAIN ---------------- */
@@ -417,6 +529,8 @@ async function updateTrain() {
     alert(data.message || "Train updated");
     document.getElementById("edit_train_no").value = "";
     document.getElementById("edit_train_name").value = "";
+    highlightTrainNo = no;
+    loadTrains();
   } catch (err) {
     alert("Error updating train");
   }
@@ -446,6 +560,8 @@ async function updateStation() {
     alert(data.message || "Station updated");
     document.getElementById("edit_station_no").value = "";
     document.getElementById("edit_station_name").value = "";
+    highlightStationNo = no;
+    loadStations();
   } catch (err) {
     alert("Error updating station");
   }
@@ -470,6 +586,80 @@ function toggleSidebar() {
 function logout() {
   localStorage.clear();
   window.location.href = "login.html";
+}
+
+// ---------------- PROFILE DROPDOWN ----------------
+function toggleProfileDropdown() {
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.classList.toggle("show");
+}
+
+// ---------------- CHANGE PASSWORD ----------------
+function openChangePassword() {
+  document.getElementById("profileDropdown").classList.remove("show");
+  document.getElementById("changePwdModal").classList.add("show");
+  document.getElementById("currentPwd").value = "";
+  document.getElementById("newPwd").value = "";
+  document.getElementById("confirmPwd").value = "";
+  document.getElementById("pwdMsg").innerText = "";
+  document.getElementById("pwdMsg").className = "pwd-msg";
+}
+
+function closeChangePassword() {
+  document.getElementById("changePwdModal").classList.remove("show");
+}
+
+async function submitChangePassword() {
+  const currentPassword = document.getElementById("currentPwd").value.trim();
+  const newPassword = document.getElementById("newPwd").value.trim();
+  const confirmPassword = document.getElementById("confirmPwd").value.trim();
+  const msgEl = document.getElementById("pwdMsg");
+
+  msgEl.innerText = "";
+  msgEl.className = "pwd-msg";
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    msgEl.innerText = "Please fill in all fields";
+    msgEl.className = "pwd-msg error";
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    msgEl.innerText = "New password must be at least 6 characters";
+    msgEl.className = "pwd-msg error";
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    msgEl.innerText = "New passwords do not match";
+    msgEl.className = "pwd-msg error";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE}/auth/change-password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      msgEl.innerText = data.message;
+      msgEl.className = "pwd-msg success";
+      setTimeout(() => closeChangePassword(), 1500);
+    } else {
+      msgEl.innerText = data.message;
+      msgEl.className = "pwd-msg error";
+    }
+  } catch (err) {
+    msgEl.innerText = "Server error. Please try again.";
+    msgEl.className = "pwd-msg error";
+  }
 }
 
 window.addEventListener("beforeunload", () => {
