@@ -1,0 +1,10 @@
+ORIGINAL API URLs (switch back before deploying to Render)
+==========================================================
+
+js/dashboard.js  (line 1):
+  const BASE = "https://railway-water-backend.onrender.com/api";
+
+js/login.js  (line 1):
+  const API = "https://railway-water-backend.onrender.com/api";
+
+Currently changed to: http://localhost:5000/api

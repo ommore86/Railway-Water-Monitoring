@@ -93,7 +93,7 @@ exports.forgotPassword = async (req, res) => {
       [token, expiry, email]
     );
 
-    // 3. Email content
+    // Email content
     const mailOptions = {
       from: `"Railway Support" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -111,10 +111,9 @@ exports.forgotPassword = async (req, res) => {
       `
     };
 
-    // 4. Send the Email
+    // Send the Email
     await transporter.sendMail(mailOptions);
 
-    // 5. Response (token is NOT sent in JSON for security)
     res.json({ message: "Reset token sent to your email." });
 
   } catch (err) {
