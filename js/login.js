@@ -9,28 +9,34 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function login() {
+  try {
+    const email = emailInput("email");
+    const password = emailInput("password");
 
-  const email = emailInput("email");
-  const password = emailInput("password");
+    if (!email || !password) return alert("Please enter email and password");
 
-  const res = await fetch(`${API}/auth/login`, {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({email,password})
-  });
+    const res = await fetch(`${API}/auth/login`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({email,password})
+    });
 
-  const data = await res.json();
-  if(!res.ok) return alert(data.message);
+    const data = await res.json();
+    console.log("Login response:", res.status, data);
+    if(!res.ok) return alert(data.message || "Login failed");
 
-  localStorage.clear();
-  localStorage.setItem("token",data.token);
-  localStorage.setItem("role",data.role);
-  localStorage.setItem("name",data.name);
-  localStorage.setItem("email", email);
-  localStorage.setItem("email",data.email);
-  localStorage.setItem("station",data.station||"");
+    localStorage.clear();
+    localStorage.setItem("token",data.token);
+    localStorage.setItem("role",data.role);
+    localStorage.setItem("name",data.name);
+    localStorage.setItem("email",data.email);
+    localStorage.setItem("station",data.station||"");
 
-  window.location.href="dashboard.html";
+    window.location.href="dashboard.html";
+  } catch (err) {
+    console.error("Login fetch error:", err);
+    alert("Cannot reach server. Check your connection.");
+  }
 }
 
 function emailInput(id){

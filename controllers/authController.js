@@ -11,7 +11,7 @@ const SECRET = process.env.JWT_SECRET || "railway_secret";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    
+
     user: process.env.EMAIL_USER, 
     pass: process.env.EMAIL_PASS  
   }
@@ -71,56 +71,66 @@ exports.login = async (req, res) => {
       email: user.email
     });
   } catch (err) {
-    res.status(500).json({ message: "Login error" });
+    console.error("[LOGIN ERROR]", err.message, err.stack);
+    res.status(500).json({ message: "Login error", debug: err.message });
   }
 };
 
 /* ================= FORGOT PASSWORD ================= */
 exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  // --- Step 1: DB lookup ---
+  let rows;
   try {
-    const { email } = req.body;
+    [rows] = await db.query("SELECT id, name FROM users WHERE email=?", [email]);
+  } catch (dbErr) {
+    console.error("[forgotPassword] DB error:", dbErr.message);
+    return res.status(500).json({ message: "Database error. Please try again later.", debug: dbErr.message });
+  }
 
-    const [rows] = await db.query("SELECT id, name FROM users WHERE email=?", [email]);
-    
-    if (!rows.length) return res.status(404).json({ message: "Email not found" });
+  if (!rows.length) return res.status(404).json({ message: "Email not found" });
 
-    // Generate a secure 8-character token
-    const token = crypto.randomBytes(4).toString("hex").toUpperCase(); 
-    const expiry = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes expiry
+  // --- Step 2: Generate token & save to DB ---
+  const token = crypto.randomBytes(4).toString("hex").toUpperCase();
+  const expiry = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
 
-    // Save token to DB
+  try {
     await db.query(
       "UPDATE users SET reset_token=?, reset_expiry=? WHERE email=?",
       [token, expiry, email]
     );
-
-    // Email content
-    const mailOptions = {
-      from: `"Railway Support" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your Password Reset Token",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-          <h2 style="color: #2c3e50; text-align: center;">Password Reset</h2>
-          <p>Hello <strong>${rows[0].name}</strong>,</p>
-          <p>You requested a password reset. Please use the verification code below:</p>
-          <div style="background: #f8f9fa; border: 2px dashed #dee2e6; padding: 15px; font-size: 28px; font-weight: bold; text-align: center; letter-spacing: 5px; color: #e74c3c; margin: 20px 0;">
-            ${token}
-          </div>
-          <p style="font-size: 12px; color: #7f8c8d; text-align: center;">This code will expire in 15 minutes. If you did not request this, please ignore this email.</p>
-        </div>
-      `
-    };
-
-    // Send the Email
-    await transporter.sendMail(mailOptions);
-
-    res.json({ message: "Reset token sent to your email." });
-
-  } catch (err) {
-    console.error("Mail Error:", err);
-    res.status(500).json({ message: "Failed to send reset email." });
+  } catch (dbErr) {
+    console.error("[forgotPassword] DB update error:", dbErr.message);
+    return res.status(500).json({ message: "Failed to save reset token.", debug: dbErr.message });
   }
+
+  // --- Step 3: Send email ---
+  const mailOptions = {
+    from: `"Railway Support" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Your Password Reset Token",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+        <h2 style="color: #2c3e50; text-align: center;">Password Reset</h2>
+        <p>Hello <strong>${rows[0].name}</strong>,</p>
+        <p>You requested a password reset. Please use the verification code below:</p>
+        <div style="background: #f8f9fa; border: 2px dashed #dee2e6; padding: 15px; font-size: 28px; font-weight: bold; text-align: center; letter-spacing: 5px; color: #e74c3c; margin: 20px 0;">
+          ${token}
+        </div>
+        <p style="font-size: 12px; color: #7f8c8d; text-align: center;">This code will expire in 15 minutes. If you did not request this, please ignore this email.</p>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (mailErr) {
+    console.error("[forgotPassword] Email error:", mailErr.message);
+    return res.status(500).json({ message: "Token saved but email failed to send.", debug: mailErr.message });
+  }
+
+  res.json({ message: "Reset token sent to your email." });
 };
 
 /* ================= RESET PASSWORD ================= */
